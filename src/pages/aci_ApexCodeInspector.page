@@ -1,0 +1,25 @@
+<apex:page controller="aci_ApexCodeInspector">
+	<apex:form >
+		<apex:pageblock title="Apex Code Quality Inspector">
+			<apex:pageBlock title="Please choose Apex Classes you want to inspect:">
+				<apex:pageblockbuttons>
+					<apex:commandButton action="{!inspectSelectedClasses}"/>
+				</apex:pageblockbuttons>
+				<apex:pageblockSectionItem>
+					<apex:outputLabel value="Show classes in table:"/>
+					<apex:selectList value="{!numberOfClassesToShow}">
+						<apex:selectoption itemValue="10"/>
+						<apex:selectoption itemValue="50"/>
+						<apex:selectoption itemValue="100"/>
+					</apex:selectList>
+				</apex:pageblockSectionItem>
+				<apex:pageblockTable value="{!classes}" var="class">
+					<apex:column title="Select">
+						<apex:inputCheckbox value="{!apexClassIsSelected[class.Id]}"/>
+					</apex:column>
+					<apex:column title="Apex Class Name" value="{!class.Name}"/>
+				</apex:pageblockTable>
+			</apex:pageBlock>
+		</apex:pageblock>
+	</apex:form>
+</apex:page>
