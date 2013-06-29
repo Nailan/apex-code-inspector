@@ -1,20 +1,26 @@
 public with sharing class aci_ApexCodeInspector {
 	public Map<String, Boolean> apexClassIsSelected {get;set;}
 	public ApexClass [] classes{get;set;}
-	public Integer numberOfClassesToShow{get;set;}
+	public Integer numberOfClassesToShow {get;set;}
+	public String searchByName{get;set;}
+	public Inspectresult[] results{get;set;}
+	public Integer currentStep{get;set;}
+	
+	public class InspectResult{
+		public String status{get;set;}
+		public String errors{get;set;}
+		public String apexClassName{get;set;}
+	}
 	
 	public aci_ApexCodeInspector(){
 		initialize();
 	}
 	
 	public void initialize(){
-		classes = loadClasses();
-		apexClassIsSelected = initializeApexClassIsSelected(classes);
+		results = new List<InspectResult>();
 		numberOfClassesToShow = 100;
-	}
-	
-	public void initialize(String searchString){
-		classes = loadClasses(searchString);
+		currentStep = 1;
+		classes = loadClasses();
 		apexClassIsSelected = initializeApexClassIsSelected(classes);
 	}
 	
@@ -25,8 +31,15 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public ApexClass [] loadClasses(String searchString){
+		if(searchString != null){
+		searchString = '%' + searchString + '%';
 		return [select id, Body, Name from ApexClass  
-				where Status =: 'Active' ORDER BY Name LIMIT : numberOfClassesToShow];	
+				where Status =: 'Active'
+				and Name like : searchString ORDER BY Name LIMIT : numberOfClassesToShow];
+		}
+		else{
+			return loadClasses();
+		}	
 	}
 	
 	public Map<String, Boolean> initializeApexClassIsSelected(ApexClass [] classes){
@@ -37,7 +50,29 @@ public with sharing class aci_ApexCodeInspector {
 		return resultMap;
 	}
 	
+	public void applyFilter(){
+		classes = loadClasses(searchByName);
+		apexClassIsSelected = initializeApexClassIsSelected(classes);	
+	}
+	
 	public void inspectSelectedClasses(){
-		
+		results.clear();
+		for(ApexClass cl : classes){
+			if(apexClassIsSelected.get(cl.Id) == true){
+				results.add(inspectClass(cl));	
+			}
+		}
+		currentStep = 2;	
+	}
+	
+	public void back(){
+		currentStep = 1;
+	}
+	
+	public InspectResult inspectClass(ApexClass cl){
+		InspectResult res = new InspectResult();
+		res.apexClassName = cl.Name;
+		res.status = 'OK';
+		return res;
 	}
 }
