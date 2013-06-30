@@ -5,11 +5,21 @@ public with sharing class aci_ApexCodeInspector {
 	public String searchByName{get;set;}
 	public Inspectresult[] results{get;set;}
 	public Integer currentStep{get;set;}
+	public List<ClassInspector> classInspectors{get;set;}
+	public List<TriggerInspector> triggerInspectors{get;set;}
 	
 	public class InspectResult{
 		public String status{get;set;}
 		public String errors{get;set;}
 		public String apexClassName{get;set;}
+	}
+	
+	public interface ClassInspector{
+		InspectResult inspectClass(ApexClass cl);
+	}
+	
+	public interface TriggerInspector{
+		InspectResult inspectTrigger(ApexTrigger cl);
 	}
 	
 	public aci_ApexCodeInspector(){
@@ -59,7 +69,9 @@ public with sharing class aci_ApexCodeInspector {
 		results.clear();
 		for(ApexClass cl : classes){
 			if(apexClassIsSelected.get(cl.Id) == true){
-				results.add(inspectClass(cl));	
+				for(ClassInspector ci : classInspectors){
+					results.add(ci.inspectClass(cl));		
+				}	
 			}
 		}
 		currentStep = 2;	
@@ -69,10 +81,12 @@ public with sharing class aci_ApexCodeInspector {
 		currentStep = 1;
 	}
 	
-	public InspectResult inspectClass(ApexClass cl){
-		InspectResult res = new InspectResult();
-		res.apexClassName = cl.Name;
-		res.status = 'OK';
-		return res;
+	public class SOQLInLoopsInspector implements ClassInspector{
+		public InspectResult inspectClass(ApexClass cl){
+			InspectResult result = new InspectResult();
+			
+			return result;	
+		}	
 	}
+	
 }
