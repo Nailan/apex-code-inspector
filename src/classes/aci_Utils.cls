@@ -1,20 +1,5 @@
 public without sharing class aci_Utils {
 	
-	public static String [] retrieveScopes(String classBody){
-		Map<Integer, Integer> beginEndScopePos = getScopesRanges(classBody);
-		List<Integer> sortedKeyset = new List<Integer>();
-		sortedKeyset.addAll(beginEndScopePos.keyset());
-		sortedKeyset.sort();
-		String [] scopes = new List<String>();
-		for(Integer i = 0; i < sortedKeyset.size(); i ++){
-			Integer beg = sortedKeyset.get(i);
-			Integer begScopeDef = getScopeDefinitionBeginning(classBody.substring(0, beg));
-			Integer endPos = beginEndScopePos.get(beg) + 1;
-			scopes.add(classBody.substring(begScopeDef, beginEndScopePos.get(beg) + 1));
-		}
-		return scopes;
-	}
-	
 	public static Map<Integer, Integer> getScopesRanges(String classBody){
 		Integer totalScopes = classBody.countMatches('{');
 		Integer [] beginBracketsPos = new List<Integer>();
@@ -41,32 +26,6 @@ public without sharing class aci_Utils {
 			beginEndScopePos.put(begPos, endPos);
 		}
 		return beginEndScopePos;	
-	}
-	
-	public static Integer getScopeDefinitionBeginning(String str){
-		Integer pos = 0;
-		Integer semicolonPos = str.lastIndexOf(';');
-		Boolean splittingSemicolonDetected = false;
-		while(!splittingSemicolonDetected && semicolonPos != -1){
-			if(str.substring(semicolonPos).countMatches(')') == str.substring(semicolonPos).countMatches('(')){
-				splittingSemicolonDetected = true;
-			}
-			else{
-				semicolonPos = str.substring(0, semicolonPos).lastIndexOf(';');
-			}
-		}
-		Integer begBracket = str.lastIndexOf('{');
-		Integer endBracket = str.lastIndexOf('}');
-		if(pos < begBracket){
-			pos = begBracket + 1;
-		}
-		if(pos < endBracket){
-			pos = endBracket + 1;
-		}
-		if(pos < semicolonPos){
-			pos = semicolonPos + 1;
-		}
-		return pos;
 	}
 	
 	public static String castStringToACIFormat(String classBody){
