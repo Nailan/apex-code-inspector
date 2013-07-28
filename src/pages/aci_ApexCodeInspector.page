@@ -5,15 +5,16 @@
 <apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/jquery.tablesorter.min.js')}"/> 
 <apex:include pageName="scp_FullPageAjax" />-->
 	<apex:form >
-		<apex:pageblock title="Apex Code Quality Inspector">
-			<apex:pageBlock title="Please choose Apex Classes you want to inspect" rendered="{!currentStep == 1}">
+		<apex:pageblock title="Apex Code Quality Analizyst">
+			<apex:pagemessages />
+			<apex:pageBlock title="Please choose Apex Classes you want to analyze" rendered="{!currentStep == 1}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="Next" title="Next" action="{!toSecondStep}"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockSection columns="1">
 					<apex:pageblockSectionItem >
 						<apex:outputLabel value="Number of items to show"/>
-						<apex:selectList value="{!numberOfClassesToShow}" size="1" multiselect="false" label="Show classes in table:">
+						<apex:selectList value="{!numberOfItemsToShow}" size="1" multiselect="false" label="Show items in table:">
 							<apex:selectoption itemValue="10"/>
 							<apex:selectoption itemValue="50"/>
 							<apex:selectoption itemValue="100"/>
@@ -39,8 +40,11 @@
 					<apex:commandButton value="Next" title="Next" action="{!inspectSelectedClasses}"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockTable value="{!classInspectors}" var="ins" id="inspectors_table">
-					<apex:column headerValue="Inspector Name" value="{!ins.name}"/>
-					<apex:column headerValue="Inspector Description" value="{!ins.description}"/>
+					<apex:column headerValue="Select">
+						<apex:inputCheckbox value="{!ins.IsSelected}"/> 
+					</apex:column>
+					<apex:column headerValue="Inspector Name" value="{!ins.classInspector.name}"/>
+					<apex:column headerValue="Inspector Description" value="{!ins.classInspector.description}"/>
 				</apex:pageblockTable>	
 			</apex:pageBlock>
 		
