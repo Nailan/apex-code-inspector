@@ -74,45 +74,63 @@ public without sharing class aci_Utils {
 		String slashesCommentRegEx = '//.*\n';
 		String stringLiteralRegEx = '\'.*\'';
 		classBody = classBody.replaceAll(starsCommentRegEx, '').replaceAll(slashesCommentRegEx, '\n').replaceAll(stringLiteralRegEx, '#aci_string_literal#');
-		classBody = classBody.replaceAll('\n', '#aci_end_line#');
 		return classBody;
 	}
 	
 	public static String replaceAllSpaceSymbols(String str){
 		return str.replaceAll('\t', '').replaceAll(' ', '').replaceAll('\n', '');
 	}
-	//to do: inner classes support
+	
 	public static String [] findClassNamesWhichImplementInterface(String interfaceName){
-		String classPat = 'class[ \t\n\f\r]{1,}[a-zA-Z_0-9]{1,}[ \t\n\f\r]{1,}implements[ \t\n\f\r]{1,}aci_ApexCodeInspector\\.ClassInspector.*\\}';
+		String interfaceNameRegex = interfaceName.replaceAll('\\.', '\\\\\\\\.');
+		system.debug('!!!!!! interface reg ex=' + interfaceNameRegex);
+		String classPat = 'class[ \t\n\f\r]{1,}.[^{]{1,}';
 		ApexClass [] classes = [select id, Name, Body 
 								from ApexClass
 								where Status =: 'Active'];
-		system.debug('####### classes fount=' + classes.size() + '\n searching by a pattern ' + classPat);
+		String classWithInterfaceRegex = '[ \t\n\f\r]{1,}implements[ \t\n\f\r]{1,}.*[ \t\n\f\r]|[,]{1,}' + interfaceName;
 		String [] classNames = new List<String>();
 		for(ApexClass cl : classes){
-			system.debug('############# class name=' + cl.Name);
 			String body = cl.Body;
 			body = castStringToACIFormat(body);
-			system.debug('############ body =' + body);
-			//body = replaceAllSpaceSymbols(body);
-			Pattern implPattern = Pattern.compile(classPat);
-			Matcher match = implPattern.matcher(body);
+			if(!body.contains(interfaceName)){
+				continue;
+			}
+			Pattern classPattern = Pattern.compile(classPat);
+			Matcher match = classPattern.matcher(body);
 			Integer startPos = 0;
 			Integer endPos = body.length();
-			if(match.region(startPos, endPos).find()){
-				system.debug('################ !!!!!!!!!!!!!!!');
-				startPos = match.start();
-				system.debug('############# ' + match.group());
+			Map<Integer, Integer> scopes = getScopesRanges(body);
+			List<String> classDefs = new List<String>();
+			List<String> classBodies = new List<String>();
+			while(match.region(startPos, endPos).find()){
+				classDefs.add(match.group());
+				classBodies.add(body.substring(match.end(), scopes.get(match.end())));
+				startPos = match.end();
 			}
-			/*if(body.containsIgnoreCase(searchString)){
-				system.debug('!!!!!!!!!!!! got!!!!!!!!!!');
-				String name = cl.Name;
-				Integer defenitionPos = 0;
-				for(Integer i = 0; i < body.countMatches(searchString); i ++){
-					
+			for(Integer i = classDefs.size() - 1; i >= 0; i --){
+				String classDef = classDefs.get(i);
+				String className = classDef.replaceAll('class[ \t\n\f\r]{1,}', '').replaceAll('[ \t\n\f\r]{1,}.*', '');
+				String classBody = classBodies.get(i);
+				system.debug('!!!!!!!!!!! className=' + className);
+				system.debug('!!!!!!!!!!! classDef=' + classDef);
+				system.debug('!!!!!!!!!!! classBody=' + classBody);
+				for(Integer j = 0; j < i; j ++){
+					String parentClassDef = classDefs.get(j); 
+					String parentClassName = parentClassDef.replaceAll('class[ \t\n\f\r]{1,}', '').replaceAll('[ \t\n\f\r]{1,}.*', '');
+					String parentClassBody = classBodies.get(j);
+					system.debug('!!!!!!! parentClassBody=' + parentClassBody);
+					if(parentClassBody.contains(classBody)){
+						className = parentClassName + '.' + className;
+					}
 				}
-				classNames.add(cl.Name);
-			}*/
+				system.debug('!!!!!!!!!!! finalClassName=' + className);
+				Pattern interfacePattern = Pattern.compile(classWithInterfaceRegex);
+				Matcher interfaceMatcher = interfacePattern.matcher(classDef);
+				if(interfaceMatcher.find()){
+					classNames.add(className);
+				}
+			}
 		}
 		return classNames;
 	}
