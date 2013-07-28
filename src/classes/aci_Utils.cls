@@ -82,13 +82,11 @@ public without sharing class aci_Utils {
 	}
 	
 	public static String [] findClassNamesWhichImplementInterface(String interfaceName){
-		String interfaceNameRegex = interfaceName.replaceAll('\\.', '\\\\\\\\.');
-		system.debug('!!!!!! interface reg ex=' + interfaceNameRegex);
 		String classPat = 'class[ \t\n\f\r]{1,}.[^{]{1,}';
 		ApexClass [] classes = [select id, Name, Body 
 								from ApexClass
 								where Status =: 'Active'];
-		String classWithInterfaceRegex = '[ \t\n\f\r]{1,}implements[ \t\n\f\r]{1,}.*[ \t\n\f\r]|[,]{1,}' + interfaceName;
+		String classWithInterfaceRegex = '[ \t\n\f\r]{1,}implements[ \t\n\f\r]{1,}(.*[,]{1,}' + interfaceName + ')|(' + interfaceName + ')';
 		String [] classNames = new List<String>();
 		for(ApexClass cl : classes){
 			String body = cl.Body;
@@ -120,7 +118,7 @@ public without sharing class aci_Utils {
 					String parentClassName = parentClassDef.replaceAll('class[ \t\n\f\r]{1,}', '').replaceAll('[ \t\n\f\r]{1,}.*', '');
 					String parentClassBody = classBodies.get(j);
 					system.debug('!!!!!!! parentClassBody=' + parentClassBody);
-					if(parentClassBody.contains(classBody)){
+					if(parentClassBody.contains(classBody) && parentClassBody.contains(classDef)){
 						className = parentClassName + '.' + className;
 					}
 				}
@@ -128,6 +126,7 @@ public without sharing class aci_Utils {
 				Pattern interfacePattern = Pattern.compile(classWithInterfaceRegex);
 				Matcher interfaceMatcher = interfacePattern.matcher(classDef);
 				if(interfaceMatcher.find()){
+					system.debug('########## found ' + className);
 					classNames.add(className);
 				}
 			}
