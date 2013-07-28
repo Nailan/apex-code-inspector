@@ -1,14 +1,14 @@
 <apex:page controller="aci_ApexCodeInspector">
-<!-- todo:remove resource dependencies from another projects -->
+<!-- todo:remove resource dependencies from another projects 
 <apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/jquery.js')}" />
 <apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/ui.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/jquery.tablesorter.min.js')}"/>
-<apex:include pageName="scp_FullPageAjax" />
+<apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/jquery.tablesorter.min.js')}"/> 
+<apex:include pageName="scp_FullPageAjax" />-->
 	<apex:form >
 		<apex:pageblock title="Apex Code Quality Inspector">
 			<apex:pageBlock title="Please choose Apex Classes you want to inspect" rendered="{!currentStep == 1}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Inspect Selected Classes" title="Inspect Selected Classes" action="{!inspectSelectedClasses}"/>
+					<apex:commandButton value="Next" title="Next" action="{!toSecondStep}"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockSection columns="1">
 					<apex:pageblockSectionItem >
@@ -32,17 +32,29 @@
 					<apex:column headerValue="Apex Class Name" value="{!class.Name}"/>
 				</apex:pageblockTable>
 			</apex:pageBlock>
+			
+			<apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
+				<apex:pageblockbuttons >
+					<apex:commandButton value="Back" action="{!toFirstStep}"/>
+					<apex:commandButton value="Next" title="Next" action="{!inspectSelectedClasses}"/>
+				</apex:pageblockbuttons>
+				<apex:pageblockTable value="{!classInspectors}" var="ins" id="inspectors_table">
+					<apex:column headerValue="Inspector Name" value="{!ins.name}"/>
+					<apex:column headerValue="Inspector Description" value="{!ins.description}"/>
+				</apex:pageblockTable>	
+			</apex:pageBlock>
+		
+			<!-- <apex:pageBlock title="Results" rendered="{!currentStep == 3}">
+				<apex:pageblockbuttons >
+					<apex:commandButton value="Back" action="{!toSecondStep}"/>
+				</apex:pageblockbuttons>
+				<apex:pageblockTable value="{!classes}" var="class" id="results_table">
+					<apex:column headerValue="Class Name" value="{!class.Name}"/>
+					<apex:column headerValue="Status" value="{!classIdResult[class.Id].status}"/>
+				</apex:pageblockTable>
+			</apex:pageBlock> -->
 		</apex:pageblock>
 		
-		<apex:pageBlock title="Results" rendered="{!currentStep == 2}">
-			<apex:pageblockbuttons >
-					<apex:commandButton value="Back" action="{!Back}"/>
-				</apex:pageblockbuttons>
-			<apex:pageblockTable value="{!results}" var="res" id="results_table">
-				<apex:column headerValue="Class Name" value="{!res.apexClassName}"/>
-				<apex:column headerValue="Status" value="{!res.Status}"/>
-				<apex:column headerValue="Information" value="{!res.errors}"/>
-			</apex:pageblockTable>
-		</apex:pageBlock>
+		
 	</apex:form>
 </apex:page>
