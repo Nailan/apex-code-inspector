@@ -1,17 +1,17 @@
-<apex:page controller="aci_ApexCodeInspector">
+<apex:page controller="aci_ApexCodeInspector" sidebar="false">
 <!-- todo:remove resource dependencies from another projects 
 <apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/jquery.js')}" />
 <apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/ui.js')}" />
 <apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/jquery.tablesorter.min.js')}"/> 
 <apex:include pageName="scp_FullPageAjax" />-->
 	<apex:form >
-		<apex:pageblock title="Apex Code Quality Analizyst">
+		<apex:pageblock title="Apex Code Quality Analizyst" id="whole_page">
 			<apex:pagemessages />
 			<apex:pageBlock title="Please choose Apex Classes you want to analyze" rendered="{!currentStep == 1}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Next" title="Next" action="{!toSecondStep}"/>
+					<apex:commandButton value="Next" title="Next" action="{!toSecondStep}" rerender="whole_page"/>
 				</apex:pageblockbuttons>
-				<apex:pageblockSection columns="1">
+				<apex:pageblockSection columns="1" title="Filter" collapsible="false">
 					<apex:pageblockSectionItem >
 						<apex:outputLabel value="Number of items to show"/>
 						<apex:selectList value="{!numberOfItemsToShow}" size="1" multiselect="false" label="Show items in table:">
@@ -24,20 +24,22 @@
 						<apex:outputLabel value="Name"/>
 						<apex:inputText value="{!searchByName}"/>
 					</apex:pageblockSectionItem>
+					<apex:commandButton value="Apply Filter" action="{!applyFilter}" rerender="classes_table" status="FullPageStatus" style="margin-left:300px;"/>
 				</apex:pageblockSection>
-				<apex:commandButton value="Apply" action="{!applyFilter}" rerender="classes_table" status="FullPageStatus" style="margin-left:300px;"/>
-				<apex:pageblockTable value="{!classes}" var="class" id="classes_table">
-					<apex:column headerValue="Select">
-						<apex:inputCheckbox value="{!apexClassIsSelected[class.Id]}"/>
-					</apex:column>
-					<apex:column headerValue="Apex Class Name" value="{!class.Name}"/>
-				</apex:pageblockTable>
+				<apex:pageblockSection columns="1" title="Available Classes" collapsible="false">
+					<apex:pageblockTable value="{!classes}" var="class" id="classes_table" title="Available Classes">
+						<apex:column headerValue="Select">
+							<apex:inputCheckbox value="{!apexClassIsSelected[class.Id]}"/>
+						</apex:column>
+						<apex:column headerValue="Apex Class Name" value="{!class.Name}"/>
+					</apex:pageblockTable>
+				</apex:pageblockSection>
 			</apex:pageBlock>
 			
 			<apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Back" action="{!toFirstStep}"/>
-					<apex:commandButton value="Next" title="Next" action="{!inspectSelectedClasses}"/>
+					<apex:commandButton value="Back" action="{!toFirstStep}" rerender="whole_page"/>
+					<apex:commandButton value="Next" title="Next" action="{!inspectSelectedClasses}" rerender="whole_page"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockTable value="{!classInspectors}" var="ins" id="inspectors_table">
 					<apex:column headerValue="Select">
@@ -48,15 +50,28 @@
 				</apex:pageblockTable>	
 			</apex:pageBlock>
 		
-			<!-- <apex:pageBlock title="Results" rendered="{!currentStep == 3}">
+			<apex:pageBlock title="Results" rendered="{!currentStep == 3}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Back" action="{!toSecondStep}"/>
+					<apex:commandButton value="Back" action="{!toSecondStep}" rerender="whole_page"/>
+					<apex:commandButton value="Export to PDF"/>
 				</apex:pageblockbuttons>
-				<apex:pageblockTable value="{!classes}" var="class" id="results_table">
-					<apex:column headerValue="Class Name" value="{!class.Name}"/>
-					<apex:column headerValue="Status" value="{!classIdResult[class.Id].status}"/>
-				</apex:pageblockTable>
-			</apex:pageBlock> -->
+				<apex:repeat value="{!itemNames}" var="itemName" id="results_table">
+					<apex:pageblockTable value="{!itemNameResultMap[itemName]}" var="res" title="Results for {!itemName}">
+						<apex:column headerValue="Results for {!itemName}" width="20%">
+							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/warning.png')}" rendered="{!res.Status__c == 'Warning'}"/>
+							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/good.png')}" rendered="{!res.Status__c == 'Good'}"/>
+							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/error.png')}" rendered="{!res.Status__c == 'Error'}"/>
+							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/info.png')}" rendered="{!res.Status__c == 'Info'}"/>
+						</apex:column>
+						<apex:column headerValue="Inspector Name" width="30%">
+							 {!res.Inspector_Name__c}
+						</apex:column>
+						<apex:column headerValue="Message" width="50%">
+							 {!res.Message__c}
+						</apex:column>
+					</apex:pageblockTable>
+				</apex:repeat>
+			</apex:pageBlock>
 		</apex:pageblock>
 		
 		

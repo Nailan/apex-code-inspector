@@ -8,21 +8,20 @@ public with sharing class aci_ApexCodeInspector {
 	public Map<String, Boolean> triggerIsSelected {get;set;}
 	public Integer numberOfItemsToShow {get;set;}
 	public String searchByName{get;set;}
-	public Map<String, aci_Inspect_Result__c[]> classIdResult{get;set;}
-	public Map<String, aci_Inspect_Result__c[]> triggerIdResult{get;set;}
+	public Map<String, aci_Inspect_Result__c[]> itemNameResultMap{get;set;}
 	public Integer currentStep{get;set;}
 	public String mode{get;set;}
 	public List<InspectorWrapper> classInspectors{get;set;}
 	public List<InspectorWrapper> triggerInspectors{get;set;}
 	
 	public interface ClassInspector{
-		aci_Inspect_Result__c inspectClass(ApexClass cl);
+		aci_Inspect_Result__c inspectClass(String classBody);
 		String getName();
 		String getDescription();
 	}
 	
 	public interface TriggerInspector{
-		aci_Inspect_Result__c inspectTrigger(ApexTrigger cl);
+		aci_Inspect_Result__c inspectTrigger(String triggerBody);
 		String getName();
 		String getDescription();
 	}
@@ -45,12 +44,11 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public void initialize(){
-		classIdResult = new Map<String, aci_Inspect_Result__c[]>();
+		itemNameResultMap = new Map<String, aci_Inspect_Result__c[]>();
 		numberOfItemsToShow = 100;
 		currentStep = 1;
 		loadClasses();
 		initializeApexClassIsSelectedMap(classes);
-		loadClassInspectors();
 		mode = 'class_inspecting';
 	}
 	
@@ -97,18 +95,21 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public void inspectSelectedClasses(){
-		classIdResult.clear();
+		itemNameResultMap.clear();
 		for(ApexClass cl : classes){
 			if(apexClassIsSelected.get(cl.Id) == true){
 				aci_Inspect_Result__c [] results = new List<aci_Inspect_Result__c>();
 				for(InspectorWrapper ci : classInspectors){
-					if(ci.isSelected)
-						results.add(ci.classInspector.inspectClass(cl));		
+					if(ci.isSelected){
+						aci_Inspect_Result__c res = ci.classInspector.inspectClass(cl.Body);
+						res.Inspector_Name__c = ci.classInspector.getName();
+						results.add(res);
+					}	
 				}
-				classIdResult.put(cl.Id, results);
+				itemNameResultMap.put(cl.Name, results);
 			}
 		}
-		currentStep = 2;	
+		currentStep = 3;	
 	}
 	
 	public void toFirstStep(){
@@ -116,6 +117,13 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public void toSecondStep(){
+		loadClassInspectors();
 		currentStep = 2;
+	}
+	
+	public List<String> getItemNames(){
+		List<String> names = new List<String>();
+		names.addAll(itemNameResultMap.keyset());
+		return names;
 	}
 }
