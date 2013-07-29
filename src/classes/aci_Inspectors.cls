@@ -1,29 +1,17 @@
 public without sharing class aci_Inspectors {
-	public class SOQLInLoopsInspector implements aci_ApexCodeInspector.ClassInspector{
-		String MESSAGE = 'SOQL in loop found';
+	public class SOQLInLoopsInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
+		private String MESSAGE = 'SOQL in loop found';
+		private String LOOP_REG_EX = '[ \t\n\f\r]{1,}for[ \t\n\f\r]{0,}\\([^{]{1,}';
+		private String SOQL_REG_EX = '\\[[ \t\n\f\r]{0,}select[ \t\n\f\r]{1,}.*\\]';
 		
-		public aci_Inspect_Result__c inspectClass(ApexClass cl){
-			aci_Inspect_Result__c result = new aci_Inspect_Result__c();
-			result.Apex_Class_Trigger_Name__c = cl.Name;
-			String body = cl.Body;
-			String soqlInloopRegex = 'for[/S]';
-			//body = aci_Utils.castStringToACIFormat(body);
-			String [] scopes = aci_Utils.retrieveScopes(body);
-			String status = 'Good';
-			/*for(String scope : scopes){
-				if(scope.substring(0, scope.indexOf('{')).replaceAll(' ', '').toLowerCase().contains('for(')){
-					if(scope.replaceAll(' ', '').replaceAll('\n', '').replaceAll('\t', '').toLowerCase().contains('[select')){
-						result.Message__c = MESSAGE;
-						if(status == 'Good'){
-							status = 'Error';
-						}
-					}	
-				}
-			}*/
-			result.Status__c = status;
-			return result;	
-			
-			
+		public aci_Inspect_Result__c inspectClass(String classBody){
+			aci_Inspect_Result__c result = inspectItem(classBody);
+			return result;
+		}
+		
+		public aci_Inspect_Result__c inspectTrigger(String triggerBody){
+			aci_Inspect_Result__c result = inspectItem(triggerBody);
+			return result;
 		}
 		
 		public String getName(){
@@ -32,6 +20,29 @@ public without sharing class aci_Inspectors {
 		
 		public String getDescription(){
 			return 'Use this inspector to find SOQL in loops';
+		}
+		
+		private aci_Inspect_Result__c inspectItem(String body){
+			aci_Inspect_Result__c result = new aci_Inspect_Result__c();
+			body = aci_Utils.castStringToACIFormat(body);
+			Pattern loopPat = Pattern.compile(LOOP_REG_EX);
+			Matcher loopMatch = loopPat.matcher(body);
+			Integer startIndex = 0;
+			Integer endIndex = body.length();
+			Map<Integer, Integer> scopes = aci_Utils.getScopesRanges(body);
+			result.Status__c = 'Good';
+			while(loopMatch.region(startIndex, endIndex).find()){
+				system.debug('########## matching=' + loopMatch.group());
+				String loopBody = body.substring(loopMatch.end(), scopes.get(loopMatch.end()));
+				Pattern soqlPat = Pattern.compile(SOQL_REG_EX);
+				Matcher soqlMatch = soqlPat.matcher(loopBody);
+				if(soqlMatch.find()){
+					result.Status__c = 'Error';
+					result.Message__c = MESSAGE;	
+				}
+				startIndex = loopMatch.end();
+			}
+			return result;		
 		}
 	}
 }
