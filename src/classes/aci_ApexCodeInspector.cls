@@ -147,9 +147,17 @@ public with sharing class aci_ApexCodeInspector {
 	
 	public void inspectSelectedItems(){
 		if(mode == 'class_inspecting'){
+			if(!checkIfInspectorSelected(classInspectors)){
+				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.INFO,'Please select Inspectors to analyze the classes'));
+				return;	
+			}
 			inspectSelectedClasses();
 		}
 		else{
+			if(!checkIfInspectorSelected(triggerInspectors)){
+				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.INFO,'Please select Inspectors to analyze the triggers'));
+				return;	
+			}
 			inspectSelectedTriggers();
 		}
 	}
@@ -195,10 +203,20 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public void toSecondStep(){
-		if(mode == 'class_inspecting')
+		if(mode == 'class_inspecting'){
+			if(!checkIfSmthInMapSelected(apexClassIsSelected)){
+				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.INFO,'Please select at least one class for analysis'));
+				return;	
+			}
 			loadClassInspectors();
-		else
+		}
+		else{
+			if(!checkIfSmthInMapSelected(apexTriggerIsSelected)){
+				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.INFO,'Please select at least one trigger for analysis'));
+				return;	
+			}
 			loadtriggerinspectors();
+		}
 		currentStep = 2;
 	}
 	
@@ -206,5 +224,22 @@ public with sharing class aci_ApexCodeInspector {
 		List<String> names = new List<String>();
 		names.addAll(itemNameResultMap.keyset());
 		return names;
+	}
+	
+	private static boolean checkIfSmthInMapSelected(Map<String, boolean> m){
+		for(boolean b : m.values()){
+			if(b)
+				return true;
+		}
+		return false;	
+	}
+	
+	private static boolean checkIfInspectorSelected(InspectorWrapper [] iws){
+		for(InspectorWrapper iw: iws){
+			if(iw.IsSelected){
+				return true;
+			}
+		}
+		return false;
 	}
 }
