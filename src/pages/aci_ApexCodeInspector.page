@@ -1,15 +1,12 @@
 <apex:page controller="aci_ApexCodeInspector" sidebar="false">
-<!-- todo:remove resource dependencies from another projects 
-<apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/jquery.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/ui.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.SCP, 'jquery/jquery.tablesorter.min.js')}"/> 
-<apex:include pageName="scp_FullPageAjax" />-->
+
+<apex:include pageName="aci_Ajax"/>
 	<apex:form >
 		<apex:pageblock title="Apex Code Quality Analizyst" id="whole_page">
 			<apex:pagemessages id="error_panel"/>
 			<apex:pageBlock title="Please choose Items you want to analyze" rendered="{!currentStep == 1}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Next" title="Next" action="{!toSecondStep}" rerender="whole_page"/>
+					<apex:commandButton value="Next" title="Next" action="{!toSecondStep}" rerender="whole_page" status="FullPageStatus"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockSection columns="1" title="Filter" collapsible="false">
 					<apex:pageblockSectionItem >
@@ -53,8 +50,8 @@
 			
 			<apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Back" action="{!toFirstStep}" rerender="whole_page"/>
-					<apex:commandButton value="Next" title="Next" action="{!inspectSelectedItems}" rerender="whole_page"/>
+					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus" rerender="whole_page"/>
+					<apex:commandButton value="Next" title="Next" status="FullPageStatus"  action="{!inspectSelectedItems}" rerender="whole_page"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockTable value="{!classInspectors}" var="ins" id="class_inspectors_table" rendered="{!mode == 'class_inspecting'}">
 					<apex:column headerValue="Select">
@@ -74,8 +71,8 @@
 		
 			<apex:pageBlock title="Results" rendered="{!currentStep == 3}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Back" action="{!toSecondStep}" rerender="whole_page"/>
-					<apex:commandButton value="Export to PDF"/>
+					<apex:commandButton value="Back" action="{!toSecondStep}" status="FullPageStatus"  rerender="whole_page"/>
+					<apex:commandButton value="Export to PDF" status="FullPageStatus" />
 				</apex:pageblockbuttons>
 				<apex:repeat value="{!itemNames}" var="itemName" id="results_table">
 					<apex:pageblockTable value="{!itemNameResultMap[itemName]}" var="res" title="Results for {!itemName}">
