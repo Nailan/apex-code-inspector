@@ -6,8 +6,8 @@
 <apex:include pageName="scp_FullPageAjax" />-->
 	<apex:form >
 		<apex:pageblock title="Apex Code Quality Analizyst" id="whole_page">
-			<apex:pagemessages />
-			<apex:pageBlock title="Please choose Apex Classes you want to analyze" rendered="{!currentStep == 1}">
+			<apex:pagemessages id="error_panel"/>
+			<apex:pageBlock title="Please choose Items you want to analyze" rendered="{!currentStep == 1}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="Next" title="Next" action="{!toSecondStep}" rerender="whole_page"/>
 				</apex:pageblockbuttons>
@@ -21,12 +21,19 @@
 						</apex:selectList>
 					</apex:pageblockSectionItem>
 					<apex:pageblockSectionItem >
+						<apex:outputLabel value="Items to inspect"/>
+						<apex:selectList value="{!mode}" size="1" multiselect="false">
+							<apex:selectoption itemValue="class_inspecting" itemLabel="Apex Classes"/>
+							<apex:selectoption itemValue="trigger_inspecting" itemLabel="Apex Triggers"/>
+						</apex:selectList>
+					</apex:pageblockSectionItem>
+					<apex:pageblockSectionItem >
 						<apex:outputLabel value="Name"/>
 						<apex:inputText value="{!searchByName}"/>
 					</apex:pageblockSectionItem>
-					<apex:commandButton value="Apply Filter" action="{!applyFilter}" rerender="classes_table" status="FullPageStatus" style="margin-left:300px;"/>
+					<apex:commandButton value="Apply Filter" action="{!applyFilter}" rerender="whole_page" status="FullPageStatus" style="margin-left:300px;"/>
 				</apex:pageblockSection>
-				<apex:pageblockSection columns="1" title="Available Classes" collapsible="false">
+				<apex:pageblockSection columns="1" title="Available Classes" collapsible="false" rendered="{!mode == 'class_inspecting'}" id="classes_section">
 					<apex:pageblockTable value="{!classes}" var="class" id="classes_table" title="Available Classes">
 						<apex:column headerValue="Select">
 							<apex:inputCheckbox value="{!apexClassIsSelected[class.Id]}"/>
@@ -34,20 +41,35 @@
 						<apex:column headerValue="Apex Class Name" value="{!class.Name}"/>
 					</apex:pageblockTable>
 				</apex:pageblockSection>
+				<apex:pageblockSection columns="1" title="Available Triggers" collapsible="false" rendered="{!mode == 'trigger_inspecting'}" id="triggers_section">
+					<apex:pageblockTable value="{!triggers}" var="trigger" id="triggers_table" title="Available Triggers">
+						<apex:column headerValue="Select">
+							<apex:inputCheckbox value="{!apexTriggerIsSelected[trigger.Id]}"/>
+						</apex:column>
+						<apex:column headerValue="Apex Trigger Name" value="{!trigger.Name}"/>
+					</apex:pageblockTable>
+				</apex:pageblockSection>
 			</apex:pageBlock>
 			
 			<apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="Back" action="{!toFirstStep}" rerender="whole_page"/>
-					<apex:commandButton value="Next" title="Next" action="{!inspectSelectedClasses}" rerender="whole_page"/>
+					<apex:commandButton value="Next" title="Next" action="{!inspectSelectedItems}" rerender="whole_page"/>
 				</apex:pageblockbuttons>
-				<apex:pageblockTable value="{!classInspectors}" var="ins" id="inspectors_table">
+				<apex:pageblockTable value="{!classInspectors}" var="ins" id="class_inspectors_table" rendered="{!mode == 'class_inspecting'}">
 					<apex:column headerValue="Select">
 						<apex:inputCheckbox value="{!ins.IsSelected}"/> 
 					</apex:column>
 					<apex:column headerValue="Inspector Name" value="{!ins.classInspector.name}"/>
 					<apex:column headerValue="Inspector Description" value="{!ins.classInspector.description}"/>
-				</apex:pageblockTable>	
+				</apex:pageblockTable>
+				<apex:pageblockTable value="{!triggerInspectors}" var="ins" id="trigger_inspectors_table" rendered="{!mode == 'trigger_inspecting'}">
+					<apex:column headerValue="Select">
+						<apex:inputCheckbox value="{!ins.IsSelected}"/> 
+					</apex:column>
+					<apex:column headerValue="Inspector Name" value="{!ins.triggerInspector.name}"/>
+					<apex:column headerValue="Inspector Description" value="{!ins.triggerInspector.description}"/>
+				</apex:pageblockTable>
 			</apex:pageBlock>
 		
 			<apex:pageBlock title="Results" rendered="{!currentStep == 3}">
