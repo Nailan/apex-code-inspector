@@ -1,12 +1,16 @@
 <apex:page controller="aci_ApexCodeInspector" sidebar="false">
-
+<style>
+	.pbSubheader{
+		color : black !important;
+	}
+</style>
 <apex:include pageName="aci_Ajax"/>
 	<apex:form >
 		<apex:pageblock title="Apex Code Quality Analizyst" id="whole_page">
 			<apex:pagemessages id="error_panel"/>
 			<apex:pageBlock title="Please choose Items you want to analyze" rendered="{!currentStep == 1}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Next" title="Next" action="{!toSecondStep}" rerender="whole_page" status="FullPageStatus"/>
+					<apex:commandButton value="Next" title="Next" action="{!toSecondStep}" rerender="whole_page" oncomplete="window.scrollTo(0,0);" status="FullPageStatus"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockSection columns="1" title="Filter" collapsible="false">
 					<apex:pageblockSectionItem >
@@ -51,7 +55,7 @@
 			<apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus" rerender="whole_page"/>
-					<apex:commandButton value="Next" title="Next" status="FullPageStatus"  action="{!inspectSelectedItems}" rerender="whole_page"/>
+					<apex:commandButton value="Next" title="Next" status="FullPageStatus" oncomplete="window.scrollTo(0,0);" action="{!inspectSelectedItems}" rerender="whole_page"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockTable value="{!classInspectors}" var="ins" id="class_inspectors_table" rendered="{!mode == 'class_inspecting'}">
 					<apex:column headerValue="Select">
