@@ -1,8 +1,9 @@
 public without sharing class aci_Inspectors {
-	public class SOQLInLoopsInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
+	public static String LOOP_REG_EX = '(?i)[;\\{\\}]{1}[ \t\n\f\r]{0,}(for)|(while)[ \t\n\f\r]{0,}\\([^{]{1,}';
+	
+	public class SOQLInLoopsInspector ImplementS aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
 		private String MESSAGE = 'SOQL in loop found';
-		private String LOOP_REG_EX = '[ \t\n\f\r]{1,}for[ \t\n\f\r]{0,}\\([^{]{1,}';
-		private String SOQL_REG_EX = '\\[[ \t\n\f\r]{0,}select[ \t\n\f\r]{1,}.*\\]';
+		private String SOQL_REG_EX = '(?i)\\[[ \t\n\f\r]{0,}select[ \t\n\f\r]{1,}.*\\]';
 		
 		public aci_Inspect_Result__c inspectClass(String classBody){
 			aci_Inspect_Result__c result = inspectItem(classBody);

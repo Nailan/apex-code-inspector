@@ -169,9 +169,14 @@ public with sharing class aci_ApexCodeInspector {
 				aci_Inspect_Result__c [] results = new List<aci_Inspect_Result__c>();
 				for(InspectorWrapper ci : classInspectors){
 					if(ci.isSelected){
-						aci_Inspect_Result__c res = ci.classInspector.inspectClass(cl.Body);
-						res.Inspector_Name__c = ci.classInspector.getName();
-						results.add(res);
+						try{
+							aci_Inspect_Result__c res = ci.classInspector.inspectClass(cl.Body);
+							res.Inspector_Name__c = ci.classInspector.getName();
+							results.add(res);
+						}
+						catch(Exception e){
+							ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,'Error occured due inspecting by ' + ci.classInspector.getName() + ' ' + e.getMessage()));
+						}
 					}	
 				}
 				itemNameResultMap.put(cl.Name, results);
@@ -187,9 +192,14 @@ public with sharing class aci_ApexCodeInspector {
 				aci_Inspect_Result__c [] results = new List<aci_Inspect_Result__c>();
 				for(InspectorWrapper ci : triggerInspectors){
 					if(ci.isSelected){
-						aci_Inspect_Result__c res = ci.triggerInspector.inspectTrigger(tr.Body);
-						res.Inspector_Name__c = ci.triggerInspector.getName();
-						results.add(res);
+						try{
+							aci_Inspect_Result__c res = ci.triggerInspector.inspectTrigger(tr.Body);
+							res.Inspector_Name__c = ci.triggerInspector.getName();
+							results.add(res);
+						}
+						catch(Exception e){
+							ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,'Error occured due inspecting by ' + ci.triggerInspector.getName() + ' ' + e.getMessage()));
+						}
 					}	
 				}
 				itemNameResultMap.put(tr.Name, results);

@@ -53,7 +53,7 @@ private class aci_tt_cov_Utils {
     	system.assertEquals('aj = sdf; a = sadf + sdf == df; ', aci_Utils.castStringToACIFormat(test1));
     	
     	String test2 = 'fd = afasdf;//asdf\n';
-    	system.assertEquals('fd = afasdf;#aci_end_line#', aci_Utils.castStringToACIFormat(test2));
+    	system.assertEquals('fd = afasdf;\n', aci_Utils.castStringToACIFormat(test2));
     	
     	String test3 = 'asdf=\'asdf\';';
     	system.assertEquals('asdf=#aci_string_literal#;', aci_Utils.castStringToACIFormat(test3));
@@ -63,6 +63,6 @@ private class aci_tt_cov_Utils {
     } 
     @isTest(SeeAllData=true)
     static void testFindClassNamesWhichImplementInterface(){
-    	aci_Utils.findClassNamesWhichImplementInterface('aci_ApexCodeInspector.ClassInspector');
+    	system.debug('@@@@@@@@@@@@@@' + aci_Utils.findClassNamesWhichImplementInterface('aci_ApexCodeInspector.ClassInspector'));
     }
 }

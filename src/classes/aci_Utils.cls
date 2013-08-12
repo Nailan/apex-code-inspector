@@ -41,11 +41,11 @@ public without sharing class aci_Utils {
 	}
 	
 	public static String [] findClassNamesWhichImplementInterface(String interfaceName){
-		String classPat = 'class[ \t\n\f\r]{1,}.[^{]{1,}';
+		String classPat = '(?i)class[ \t\n\f\r]{1,}.[^{]{1,}';
 		ApexClass [] classes = [select id, Name, Body 
 								from ApexClass
 								where Status =: 'Active'];
-		String classWithInterfaceRegex = '[ \t\n\f\r]{1,}implements[ \t\n\f\r]{1,}(.*[,]{1,}' + interfaceName + ')|(' + interfaceName + ')';
+		String classWithInterfaceRegex = '(?i)[ \t\n\f\r]{1,}implements[ \t\n\f\r]{1,}(.*[,]{1,}' + interfaceName + ')|(' + interfaceName + ')';
 		String [] classNames = new List<String>();
 		for(ApexClass cl : classes){
 			String body = cl.Body;
