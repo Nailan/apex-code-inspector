@@ -1,4 +1,4 @@
-<h1>apex-code-inspector</h1>
+<h1>apex-code-inspector (analyst)</h1>
 ===================
 
 Have issues with force.com limitations?<br/>
