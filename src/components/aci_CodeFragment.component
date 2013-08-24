@@ -1,0 +1,8 @@
+<apex:component >
+	<apex:attribute name="CodeFragment" type="String" required="true" description="A fragment of Apex code"/>
+	<div class="codeAreaNotStyled" onclick="expandCodeArea(j$(this));">
+	</div>
+	<script>
+		j$(j$('.codeAreaNotStyled')[0]).html('<pre><code>' + hljs.highlight('java', '{!CodeFragment}').value + '</code></pre>').removeClass('codeAreaNotStyled').addClass('codeArea');
+	</script>
+</apex:component>
