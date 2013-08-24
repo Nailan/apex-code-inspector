@@ -1,39 +1,5 @@
 <apex:page >
-<apex:includeScript value="{!URLFOR($Resource.ACI, 'ACI/jquery/jquery.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.ACI, 'ACI/jquery/ui.js')}" />
-<style>
-#disablePageDiv {
-    position: fixed;
-    top: 0px;  
-    left: 0px;
-    width: 100%;
-    height: 100%;
-    z-index: 101;
-    display: none;
-    background-color: white;
-    filter: alpha(opacity=80);
-    opacity: 0.8;
-    -moz-opacity:0.8;
-    -khtml-opacity:0.8
-}
-* html #disablePageDiv {
-    position: absolute;
-}
-#ajaxImage 
-{ 
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    z-index: 101;
-    display: none;
-}
-* html #ajaxImage {
-    position: absolute;
-}
-</style>
-
 <script>
-	var j$ = jQuery.noConflict(); 
     function showAjax() {
         var w = j$('#ajaxImage').width();
         var h = j$('#ajaxImage').height();

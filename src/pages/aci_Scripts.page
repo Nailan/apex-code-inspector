@@ -1,0 +1,35 @@
+<apex:page >
+<apex:includeScript value="{!URLFOR($Resource.ACI, 'ACI/jquery/jquery.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.ACI, 'ACI/jquery/ui.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.ACI, 'ACI/highlight/highlight.pack.js')}" />
+<script>
+	var j$ = jQuery.noConflict();
+	
+	function showOpaque(){
+		j$('#disablePageDiv').show();
+	}
+	
+	function hideOpaque(){
+		j$('#disablePageDiv').hide();
+	}
+	
+	function showInCenter(el) {
+		showOpaque();
+		j$('.showInCenterContent').html(j$(el).html());
+		j$('.showInCenterDiv').show();
+		j$('.showInCenterDiv').draggable({handle: '.showInCenterHeader'});
+	}
+	
+	function expandCodeArea(divEl){
+		showInCenter(divEl);		
+	}
+</script>
+<div id="disablePageDiv"/>
+<div class="showInCenterDiv">
+	<div class="showInCenterHeader">
+		<span style="margin-left: 40%;"><b>Content:</b></span>
+		<img src="{!URLFOR($Resource.ACI, 'ACI/images/error.png')}" onclick="j$('.showInCenterDiv').hide(); hideOpaque();" style="margin-right:2px; margin-top:2px; float:right;"/>
+	</div>
+	<div class="showInCenterContent"/>
+</div>
+</apex:page>

@@ -1,0 +1,71 @@
+<apex:page >
+<apex:styleSheet value="{!URLFOR($Resource.ACI, 'ACI/highlight/styles/idea.css')}"/>
+<style>
+	.codeArea{
+		width: 100%;
+		height: 200px;
+		overflow:scroll;
+		cursor: pointer !important;
+	}
+	code{
+		font-size: 110% !important;
+	}
+</style>
+<style>
+.pbSubheader{
+	color: black !important;
+}
+#disablePageDiv {
+    position: fixed;
+    top: 0px;  
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 101;
+    display: none;
+    background-color: #CBCBCB;
+    filter: alpha(opacity=80);
+    opacity: 0.8;
+    -moz-opacity:0.8;
+    -khtml-opacity:0.8
+}
+* html #disablePageDiv {
+    position: absolute;
+}
+#ajaxImage 
+{ 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 101;
+    display: none;
+}
+* html #ajaxImage {
+    position: absolute;
+}
+.showInCenterDiv{
+	width: 70%;
+	height: 50%;
+	z-index: 102;
+	position: absolute;
+	height: 450px;
+	width: 500px;
+	display: none;
+	margin-left: 15%;
+	margin-top: 5%;
+}
+.showInCenterContent{
+	width: 100%;
+	height: 100%;
+	overflow:scroll;
+	background-color: white;
+	border-radius: 5px;
+}
+.showInCenterHeader{
+	width: 100%; 
+	height: 20px;
+	background-color:#C3C3C3;
+	border-radius: 5px;
+}
+</style>
+</apex:page>
