@@ -1,16 +1,14 @@
 <apex:page controller="aci_ApexCodeInspector" sidebar="false">
-<style>
-	.pbSubheader{
-		color : black !important;
-	}
-</style>
+<apex:include pageName="aci_Scripts"/>
+<apex:include pageName="aci_Styles"/>
 <apex:include pageName="aci_Ajax"/>
 	<apex:form >
-		<apex:pageblock title="Apex Code Quality Analizyst" id="whole_page">
+		<apex:pageblock title="Apex Code Quality Analyst" id="whole_page">
 			<apex:pagemessages id="error_panel"/>
 			<apex:pageBlock title="Please choose Items you want to analyze" rendered="{!currentStep == 1}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Next" title="Next" action="{!toSecondStep}" rerender="whole_page" oncomplete="window.scrollTo(0,0);" status="FullPageStatus"/>
+					<apex:commandButton value="History" title="History" action="{!toHistory}"/>
+					<apex:commandButton value="Next" title="Select" action="{!toSecondStep}" rerender="whole_page" oncomplete="window.scrollTo(0,0);" status="FullPageStatus"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockSection columns="1" title="Filter" collapsible="false">
 					<apex:pageblockSectionItem >
@@ -23,7 +21,7 @@
 					</apex:pageblockSectionItem>
 					<apex:pageblockSectionItem >
 						<apex:outputLabel value="Items to inspect"/>
-						<apex:selectList value="{!mode}" size="1" multiselect="false">
+						<apex:selectList value="{!modeInFilter}" size="1" multiselect="false">
 							<apex:selectoption itemValue="class_inspecting" itemLabel="Apex Classes"/>
 							<apex:selectoption itemValue="trigger_inspecting" itemLabel="Apex Triggers"/>
 						</apex:selectList>
@@ -55,7 +53,7 @@
 			<apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus" rerender="whole_page"/>
-					<apex:commandButton value="Next" title="Next" status="FullPageStatus" oncomplete="window.scrollTo(0,0);" action="{!inspectSelectedItems}" rerender="whole_page"/>
+					<apex:commandButton value="Start Analysis" title="Start" status="FullPageStatus" oncomplete="window.scrollTo(0,0);" action="{!inspectSelectedItems}" rerender="whole_page"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockTable value="{!classInspectors}" var="ins" id="class_inspectors_table" rendered="{!mode == 'class_inspecting'}">
 					<apex:column headerValue="Select">
@@ -75,28 +73,32 @@
 		
 			<apex:pageBlock title="Results" rendered="{!currentStep == 3}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Back" action="{!toSecondStep}" status="FullPageStatus"  rerender="whole_page"/>
-					<apex:commandButton value="Export to PDF" status="FullPageStatus" />
+					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus"  rerender="whole_page"/>
+					<apex:commandButton value="Save To History" status="FullPageStatus" rerender="whole_page" action="{!saveResults}"/>
 				</apex:pageblockbuttons>
 				<apex:repeat value="{!itemNames}" var="itemName" id="results_table">
-					<apex:pageblockTable value="{!itemNameResultMap[itemName]}" var="res" title="Results for {!itemName}">
-						<apex:column headerValue="Results for {!itemName}" width="20%">
-							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/warning.png')}" rendered="{!res.Status__c == 'Warning'}"/>
-							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/good.png')}" rendered="{!res.Status__c == 'Good'}"/>
-							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/error.png')}" rendered="{!res.Status__c == 'Error'}"/>
-							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/info.png')}" rendered="{!res.Status__c == 'Info'}"/>
-						</apex:column>
-						<apex:column headerValue="Inspector Name" width="30%">
-							 {!res.Inspector_Name__c}
-						</apex:column>
-						<apex:column headerValue="Message" width="50%">
-							 {!res.Message__c}
-						</apex:column>
-					</apex:pageblockTable>
+					<apex:pageblockSection title="Results for {!itemName}" columns="1">
+						<apex:pageblockTable value="{!itemNameResultMap[itemName]}" var="res" title="Results for {!itemName}">
+							<apex:column headerValue="Status" width="20%">
+								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/warning.png')}" rendered="{!res.Status == 'Warning'}"/>
+								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/good.png')}" rendered="{!res.Status == 'Ok'}"/>
+								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/error.png')}" rendered="{!res.Status == 'Error'}"/>
+								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/info.png')}" rendered="{!res.Status == 'Info'}"/>
+							</apex:column>
+							<apex:column headerValue="Inspector Name" width="30%">
+								 {!res.InspectorName}
+							</apex:column>
+							<apex:column headerValue="Details" width="50%">
+								<apex:repeat value="{!res.Details}" var="detail">
+									{!detail.Message}:<br/>
+									<c:aci_CodeFragment codeFragment="{!detail.CodeFragment}" rendered="{!detail.CodeFragment != null}"/>
+								</apex:repeat>
+							</apex:column>
+						</apex:pageblockTable>
+					</apex:pageblockSection>
 				</apex:repeat>
 			</apex:pageBlock>
 		</apex:pageblock>
-		
-		
+					
 	</apex:form>
 </apex:page>

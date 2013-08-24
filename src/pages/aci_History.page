@@ -1,0 +1,35 @@
+<apex:page sidebar="false" controller="aci_History" renderAs="{!renderAs}">
+	<apex:form >
+		<apex:pageBlock title="History" id="whole_page">
+			<apex:pageblockbuttons >
+				<apex:commandButton value="Back" title="Back" action="{!back}"/>
+				<apex:commandButton value="Export to PDF" title="Export to PDF" action="{!exportToPDF}" />
+				<apex:commandButton value="Clean History" title="Clean" action="{!cleanHistory}"/>
+			</apex:pageblockbuttons>
+			<apex:repeat value="{!executions}" var="ex">
+				<apex:pageBlockSection title="Execution on {!ex.ExecutionTime}" columns="1">
+					<apex:pageblockTable value="{!ex.Results}" var="res">
+						<apex:column headerValue="Item" width="25%">
+							{!res.ItemName}
+						</apex:column>
+						<apex:column headerValue="Status" width="10%">
+							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/warning.png')}" rendered="{!res.Status == 'Warning'}"/>
+							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/good.png')}" rendered="{!res.Status == 'Ok'}"/>
+							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/error.png')}" rendered="{!res.Status == 'Error'}"/>
+							<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/info.png')}" rendered="{!res.Status == 'Info'}"/>
+						</apex:column>
+						<apex:column headerValue="Inspector Name" width="25%">
+							 {!res.InspectorName}
+						</apex:column>
+						<apex:column headerValue="Details" width="40%">
+							<apex:repeat value="{!res.Details}" var="detail">
+								{!detail.Message}:<br/>
+								<c:aci_CodeFragment codeFragment="{!detail.CodeFragment}" rendered="{!detail.CodeFragment != null}"/>
+							</apex:repeat>
+						</apex:column>
+					</apex:pageblockTable>
+				</apex:pageBlockSection>
+			</apex:repeat>
+		</apex:pageBlock>
+	</apex:form>	
+</apex:page>
