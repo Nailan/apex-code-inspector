@@ -1,4 +1,9 @@
 public without sharing class AnalysisResult {
+	public static final String STATUS_OK = 'Ok';
+	public static final String STATUS_WARNING = 'Warning';
+	public static final String STATUS_ERROR = 'Error';
+	public static final String STATUS_INFO = 'Info';
+	
 	private aci_Inspect_Result__c result;
 	private List<AnalysisDetail> details;
 	
