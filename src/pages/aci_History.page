@@ -1,4 +1,6 @@
 <apex:page sidebar="false" controller="aci_History" renderAs="{!renderAs}">
+	<apex:include pageName="aci_Scripts"/>
+	<apex:include pageName="aci_Styles"/>
 	<apex:form >
 		<apex:pageBlock title="History" id="whole_page">
 			<apex:pageblockbuttons >

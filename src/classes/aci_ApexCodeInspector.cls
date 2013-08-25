@@ -15,6 +15,8 @@ public with sharing class aci_ApexCodeInspector {
 	public List<InspectorWrapper> classInspectors{get;set;}
 	public List<InspectorWrapper> triggerInspectors{get;set;}
 	public Boolean saved {get;set;}
+	public Integer currentItemNumber{get;set;}
+	public boolean isSaved{get;set;}
 	
 	public interface ClassInspector{
 		AnalysisResult inspectClass(String classBody);
@@ -48,6 +50,7 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public void initialize(){
+		currentItemNumber = 0;
 		itemNameResultMap = new Map<String, AnalysisResult[]>();
 		numberOfItemsToShow = 100;
 		currentStep = 1;
@@ -149,93 +152,77 @@ public with sharing class aci_ApexCodeInspector {
 		}
 	}
 	
-	public void inspectSelectedItems(){
+	public void startInspecting(){
+		currentItemNumber = 0;
+		itemNameResultMap.clear();
+		isSaved = false;
 		if(mode == 'class_inspecting'){
 			if(!checkIfInspectorSelected(classInspectors)){
 				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.INFO,'Please select Inspectors to analyze the classes'));
 				return;	
 			}
-			inspectSelectedClasses();
 		}
 		else{
 			if(!checkIfInspectorSelected(triggerInspectors)){
 				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.INFO,'Please select Inspectors to analyze the triggers'));
 				return;	
 			}
-			inspectSelectedTriggers();
 		}
 	}
 	
-	public void inspectSelectedClasses(){
-		itemNameResultMap.clear();
-		for(ApexClass cl : classes){
-			if(apexClassIsSelected.get(cl.Id) == true){
-				AnalysisResult [] results = new List<AnalysisResult>();
-				for(InspectorWrapper ci : classInspectors){
-					if(ci.isSelected){
-						try{
-							AnalysisResult res = ci.classInspector.inspectClass(cl.Body);
-							res.setInspectorName(ci.classInspector.getName());
-							res.setItemName(cl.Name);
-							results.add(res);
-						}
-						catch(Exception e){
-							ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,'Error occured due inspecting by ' + ci.classInspector.getName()
-													 + ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString()));
-						}
-					}	
-				}
-				itemNameResultMap.put(cl.Name, results);
-			}
-		}
-		currentStep = 3;	
-	}
-	
-	public void inspectSelectedTriggers(){
-		itemNameResultMap.clear();
-		for(ApexTrigger tr : triggers){
-			if(apexTriggerIsSelected.get(tr.Id) == true){
-				AnalysisResult [] results = new List<AnalysisResult>();
-				for(InspectorWrapper ci : triggerInspectors){
-					if(ci.isSelected){
-						try{
-							AnalysisResult res = ci.triggerInspector.inspectTrigger(tr.Body);
-							res.setInspectorName(ci.triggerInspector.getName());
-							res.setItemName(tr.Name);
-							results.add(res);
-						}
-						catch(Exception e){
-							ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,'Error occured due inspecting by ' + ci.triggerInspector.getName() 
-													+ ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString()));
-						}
-					}	
-				}
-				itemNameResultMap.put(tr.Name, results);
-			}
-		}
-		currentStep = 3;	
-	}
-	
-	public void toFirstStep(){
-		currentStep = 1;
-	}
-	
-	public void toSecondStep(){
+	public void inspectNextItem(){
 		if(mode == 'class_inspecting'){
-			if(!checkIfSmthInMapSelected(apexClassIsSelected)){
-				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.INFO,'Please select at least one class for analysis'));
-				return;	
-			}
-			loadClassInspectors();
+			inspectNextClass();
 		}
 		else{
-			if(!checkIfSmthInMapSelected(apexTriggerIsSelected)){
-				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.INFO,'Please select at least one trigger for analysis'));
-				return;	
-			}
-			loadtriggerinspectors();
+			inspectNextTrigger();
 		}
-		currentStep = 2;
+	}
+	
+	public void inspectNextClass(){
+		ApexClass cl = classes.get(getNextItemToInspect());
+		AnalysisResult [] results = new List<AnalysisResult>();
+		for(InspectorWrapper ci : classInspectors){
+			if(ci.isSelected){
+				try{
+					AnalysisResult res = ci.classInspector.inspectClass(cl.Body);
+					res.setInspectorName(ci.classInspector.getName());
+					res.setItemName(cl.Name);
+					results.add(res);
+				}
+				catch(Exception e){
+					ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,'Error occured due inspecting by ' + ci.classInspector.getName()
+											 + ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString()));
+				}
+			}	
+		}
+		itemNameResultMap.put(cl.Name, results);
+		currentItemNumber ++;
+	}
+	
+	public void inspectNextTrigger(){
+		ApexTrigger tr = triggers.get(getNextItemToInspect());
+		AnalysisResult [] results = new List<AnalysisResult>();
+		for(InspectorWrapper ci : triggerInspectors){
+			if(ci.isSelected){
+				try{
+					AnalysisResult res = ci.triggerInspector.inspectTrigger(tr.Body);
+					res.setInspectorName(ci.triggerInspector.getName());
+					res.setItemName(tr.Name);
+					results.add(res);
+				}
+				catch(Exception e){
+					ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,'Error occured due inspecting by ' + ci.triggerInspector.getName() 
+											+ ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString()));
+				}
+			}	
+		}
+		itemNameResultMap.put(tr.Name, results);
+		currentItemNumber ++;
+	}
+	
+	public void finishInspecting(){
+		currentStep = 3;
 	}
 	
 	public List<String> getItemNames(){
@@ -265,6 +252,15 @@ public with sharing class aci_ApexCodeInspector {
 		AnalysisExecution ex = new AnalysisExecution();
 		ex.setExecutionTime(system.now());
 		ex.setExecutedById(UserInfo.getUserId());
+		List<AnalysisResult> ress = new List<AnalysisResult>();
+		for(List<AnalysisResult> rl: itemNameResultMap.values()){
+			for(AnalysisResult r: rl){
+				ress.add(r);
+			}
+		}
+		ex.setResults(ress);
+		ex.save();
+		isSaved = true;
 		ApexPages.addMessage(new ApexPages.message(ApexPages.severity.CONFIRM, 'Saved'));
 	}
 	
@@ -272,4 +268,74 @@ public with sharing class aci_ApexCodeInspector {
 		return new Pagereference('/apex/aci_History');
 	}
 	
+	public Integer getItemsToInspectSize(){
+		Integer rem = 0;
+		if(mode == 'class_inspecting'){
+			for(String s: apexClassIsSelected.keyset()){
+				if(apexClassIsSelected.get(s) == true){
+					rem ++;
+				}
+			}
+		}
+		if(mode == 'trigger_inspecting'){
+			for(String s: apexTriggerIsSelected.keyset()){
+				if(apexTriggerIsSelected.get(s) == true){
+					rem ++;
+				}
+			}	
+		}
+		return rem;
+	}
+	
+	public Integer getNextItemToInspect(){
+		Integer itemNumber = 0;
+		Integer retIndex = 0;
+		if(mode == 'class_inspecting'){
+			for(Integer i = 0; i < classes.size(); i ++){
+				ApexClass cl = classes.get(i);
+				if(apexClassIsSelected.get(cl.Id) == true){
+					if(itemNumber == currentItemNumber){
+						retIndex = i;
+						break;	
+					}
+					itemNumber ++;
+				}	
+			}
+		}
+		else{
+			for(Integer i = 0; i < triggers.size(); i ++){
+				ApexTrigger tr = triggers.get(i);
+				if(apexTriggerIsSelected.get(tr.Id) == true){
+					if(itemNumber == currentItemNumber){
+						retIndex = i;
+						break;	
+					}
+					itemNumber ++;		
+				}	
+			}	
+		}
+		return retIndex;
+	}
+		
+	public void toFirstStep(){
+		currentStep = 1;
+	}
+	
+	public void toSecondStep(){
+		if(mode == 'class_inspecting'){
+			if(!checkIfSmthInMapSelected(apexClassIsSelected)){
+				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.INFO,'Please select at least one class for analysis'));
+				return;	
+			}
+			loadClassInspectors();
+		}
+		else{
+			if(!checkIfSmthInMapSelected(apexTriggerIsSelected)){
+				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.INFO,'Please select at least one trigger for analysis'));
+				return;	
+			}
+			loadtriggerinspectors();
+		}
+		currentStep = 2;
+	}
 }

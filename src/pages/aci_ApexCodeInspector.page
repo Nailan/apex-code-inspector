@@ -4,7 +4,9 @@
 <apex:include pageName="aci_Ajax"/>
 	<apex:form >
 		<apex:pageblock title="Apex Code Quality Analyst" id="whole_page">
-			<apex:pagemessages id="error_panel"/>
+			<apex:outputPanel styleClass="error_panel">
+				<apex:pagemessages id="error_panel"/>
+			</apex:outputPanel>
 			<apex:pageBlock title="Please choose Items you want to analyze" rendered="{!currentStep == 1}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="History" title="History" action="{!toHistory}"/>
@@ -53,7 +55,7 @@
 			<apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus" rerender="whole_page"/>
-					<apex:commandButton value="Start Analysis" title="Start" onclick="startAnalysis();" rerender="ItemsToInspectSize currentItem"/>
+					<apex:commandButton value="Start Analysis" title="Start" action="{!startInspecting}" rerender="whole_page" oncomplete="startAnalysis();"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockTable value="{!classInspectors}" var="ins" id="class_inspectors_table" rendered="{!mode == 'class_inspecting'}">
 					<apex:column headerValue="Select">
@@ -80,7 +82,7 @@
 			<apex:pageBlock title="Results" rendered="{!currentStep == 3}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus"  rerender="whole_page"/>
-					<apex:commandButton value="Save To History" status="FullPageStatus" rerender="whole_page" action="{!saveResults}"/>
+					<apex:commandButton value="Save To History" status="FullPageStatus" rerender="whole_page" action="{!saveResults}" disabled="{!isSaved}"/>
 				</apex:pageblockbuttons>
 				<apex:repeat value="{!itemNames}" var="itemName" id="results_table">
 					<apex:pageblockSection title="Results for {!itemName}" columns="1">
@@ -105,14 +107,17 @@
 				</apex:repeat>
 			</apex:pageBlock>
 		</apex:pageblock>
-		<apex:actionFunction action="{!inspectSelectedItems}" name="inspectItems_af" rerender="currentItem"/>
+		<apex:actionFunction action="{!startInspecting}" name="startInspecting_af" rerender="error_panel"/>
+		<apex:actionFunction action="{!inspectNextItem}" name="inspectNextItem_af" rerender="currentItem"/>
 		<apex:actionFunction action="{!finishInspecting}" name="finishInspecting_af" status="FullPageStatus" oncomplete="window.scrollTo(0,0);" rerender="whole_page"/>
 	</apex:form>
 <script>
 	function startAnalysis(){
-		var itemsSize = j$(j$('.ItemsToInspectSize')[0]).val();;
-		showProgressBar(itemsSize);
-		analyze();
+		if(j$(j$('.error_panel')[0]).text().length == 0){
+			var itemsSize = j$(j$('.ItemsToInspectSize')[0]).val();;
+			showProgressBar(itemsSize);
+			analyze();
+		}
 	}
 	
 	function analyze(){
@@ -123,7 +128,7 @@
 			var itemsToInsp = j$(j$('.ItemsToInspectSize')[0]).text();
 			//alert('items =' + itemsToInsp);
 			changeProgressBarProgress(itemsToInsp, curIt);
-			inspectItems_af();
+			inspectNextItem_af();
 			if(curIt < itemsToInsp){
 				analyze();
 			}

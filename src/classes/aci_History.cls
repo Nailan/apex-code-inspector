@@ -24,6 +24,7 @@ public without sharing class aci_History {
 	}
 	
 	public void loadExecutionHistory(){
+		executions = new List<AnalysisExecution>();
 		executionObjs = [select id, Executed_By__c, Execution_Time__c 
 						from aci_Analysis_Execution__c order by Execution_Time__c];
 		resultObjs = [select id, Item_Name__c, Inspector_Name__c, Status__c, CreatedDate, Analysis_Execution__c
