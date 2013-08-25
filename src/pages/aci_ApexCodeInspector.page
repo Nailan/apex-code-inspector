@@ -53,7 +53,7 @@
 			<apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus" rerender="whole_page"/>
-					<apex:commandButton value="Start Analysis" title="Start" status="FullPageStatus" oncomplete="window.scrollTo(0,0);" action="{!inspectSelectedItems}" rerender="whole_page"/>
+					<apex:commandButton value="Start Analysis" title="Start" onclick="startAnalysis();" rerender="ItemsToInspectSize currentItem"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockTable value="{!classInspectors}" var="ins" id="class_inspectors_table" rendered="{!mode == 'class_inspecting'}">
 					<apex:column headerValue="Select">
@@ -69,6 +69,12 @@
 					<apex:column headerValue="Inspector Name" value="{!ins.triggerInspector.name}"/>
 					<apex:column headerValue="Inspector Description" value="{!ins.triggerInspector.description}"/>
 				</apex:pageblockTable>
+				<apex:outputPanel styleclass="ItemsToInspectSize" id="ItemsToInspectSize" style="display:none;">
+					{!ItemsToInspectSize}
+				</apex:outputPanel>	
+				<apex:outputPanel styleclass="currentItem" id="currentItem" style="display:none;">
+					{!currentItemNumber}
+				</apex:outputPanel>	
 			</apex:pageBlock>
 		
 			<apex:pageBlock title="Results" rendered="{!currentStep == 3}">
@@ -99,6 +105,37 @@
 				</apex:repeat>
 			</apex:pageBlock>
 		</apex:pageblock>
-					
+		<apex:actionFunction action="{!inspectSelectedItems}" name="inspectItems_af" rerender="currentItem"/>
+		<apex:actionFunction action="{!finishInspecting}" name="finishInspecting_af" status="FullPageStatus" oncomplete="window.scrollTo(0,0);" rerender="whole_page"/>
 	</apex:form>
+<script>
+	function startAnalysis(){
+		var itemsSize = j$(j$('.ItemsToInspectSize')[0]).val();;
+		showProgressBar(itemsSize);
+		analyze();
+	}
+	
+	function analyze(){
+		setTimeout(function(){
+			//alert('start!');
+			var curIt = j$(j$('.currentItem')[0]).text();
+			//alert('current item =' + curIt);
+			var itemsToInsp = j$(j$('.ItemsToInspectSize')[0]).text();
+			//alert('items =' + itemsToInsp);
+			changeProgressBarProgress(itemsToInsp, curIt);
+			inspectItems_af();
+			if(curIt < itemsToInsp){
+				analyze();
+			}
+			else{
+				//alert('done!');
+				hideProgressBar();
+				finishInspecting_af();	
+			}
+			}
+			,1000
+		)
+	}
+</script>
+
 </apex:page>

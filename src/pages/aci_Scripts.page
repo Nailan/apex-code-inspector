@@ -23,8 +23,29 @@
 	function expandCodeArea(divEl){
 		showInCenter(divEl);		
 	}
+	
+	function showProgressBar(){
+		showOpaque();
+		j$('.progressBarContent').progressbar();
+		j$('.progressBarDiv').show();
+		j$('.progressBarDiv').draggable({handle: '.showInCenterHeader'});
+	}
+	
+	function changeProgressBarProgress(maxVal, val){
+		var progress =  Math.floor(100 * parseInt(val) / parseInt(maxVal));
+		j$('.progressBarContent').progressbar( "option", "value", progress);
+	}
+	
+	function hideProgressBar(){
+		hideOpaque();
+		j$('.progressBarDiv').hide();
+		j$( '.progressBarContent').progressbar( 'destroy');
+	}
+	
+	
 </script>
 <div id="disablePageDiv"/>
+
 <div class="showInCenterDiv">
 	<div class="showInCenterHeader">
 		<span style="margin-left: 40%;"><b>Content:</b></span>
@@ -32,4 +53,12 @@
 	</div>
 	<div class="showInCenterContent"/>
 </div>
+
+<div class="progressBarDiv">
+	<div class="showInCenterHeader">
+		<span style="margin-left: 40%;"><b>Please wait...</b></span>
+	</div>
+	<div class="progressBarContent"/>
+</div>
+
 </apex:page>
