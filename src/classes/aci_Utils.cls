@@ -16,7 +16,6 @@ public without sharing class aci_Utils {
         Integer startPos = 0;
         Integer endPos = classBody.length();
         while(starsComMat.region(startPos, endPos).find()){
-        	system.debug('########## found =' + starsComMat.group());
             classBody = classBody.replace(starsComMat.group(), getPlaceholder(starsComMat.group()));
             startPos = starsComMat.end();       
         }
