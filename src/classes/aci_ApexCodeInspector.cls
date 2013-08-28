@@ -17,6 +17,7 @@ public with sharing class aci_ApexCodeInspector {
 	public Boolean saved {get;set;}
 	public Integer currentItemNumber{get;set;}
 	public boolean isSaved{get;set;}
+	private List<String> errorsDuringInspecting;
 	
 	public interface ClassInspector{
 		AnalysisResult inspectClass(String classBody);
@@ -153,6 +154,7 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public void startInspecting(){
+		errorsDuringInspecting = new List<String>();
 		currentItemNumber = 0;
 		itemNameResultMap.clear();
 		isSaved = false;
@@ -191,8 +193,8 @@ public with sharing class aci_ApexCodeInspector {
 					results.add(res);
 				}
 				catch(Exception e){
-					ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,'Error occured due inspecting by ' + ci.classInspector.getName()
-											 + ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString()));
+					errorsDuringInspecting.add('Error occured due inspecting by ' + ci.classInspector.getName()
+											 + ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString());
 				}
 			}	
 		}
@@ -212,8 +214,8 @@ public with sharing class aci_ApexCodeInspector {
 					results.add(res);
 				}
 				catch(Exception e){
-					ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,'Error occured due inspecting by ' + ci.triggerInspector.getName() 
-											+ ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString()));
+					errorsDuringInspecting.add('Error occured due inspecting by ' + ci.triggerInspector.getName() 
+											+ ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString());
 				}
 			}	
 		}
@@ -223,6 +225,8 @@ public with sharing class aci_ApexCodeInspector {
 	
 	public void finishInspecting(){
 		currentStep = 3;
+		for(String m: errorsDuringInspecting)
+			ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR, m));
 	}
 	
 	public List<String> getItemNames(){
