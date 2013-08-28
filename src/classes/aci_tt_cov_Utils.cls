@@ -29,6 +29,9 @@ public with sharing class aci_tt_cov_Utils {
 	}
 	
 	public static testmethod void testGetScopesRanges(){
-		
+		String str = '{{12345}    {12345}}';
+		system.assertEquals(19, aci_Utils.getScopesRanges(str).get(0));
+		system.assertEquals(7, aci_Utils.getScopesRanges(str).get(1));
+		system.assertEquals(18, aci_Utils.getScopesRanges(str).get(12));
 	}
 }
