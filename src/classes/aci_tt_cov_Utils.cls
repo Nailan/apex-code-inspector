@@ -17,7 +17,7 @@ public with sharing class aci_tt_cov_Utils {
 	
 	public static testmethod void testGetLineNumber(){
 		String str = '123\n\n\n45\n\n67 ';
-		system.assertEquals(5, aci_Utils.getLineNumber(str, 10));
+		system.assertEquals(6, aci_Utils.getLineNumberOfPosition(str, 10));
 	}
 	
 	public static testmethod void testCastStringToACIFormat(){
@@ -33,5 +33,21 @@ public with sharing class aci_tt_cov_Utils {
 		system.assertEquals(19, aci_Utils.getScopesRanges(str).get(0));
 		system.assertEquals(7, aci_Utils.getScopesRanges(str).get(1));
 		system.assertEquals(18, aci_Utils.getScopesRanges(str).get(12));
+	}
+	
+	public static testmethod void testGetLineStartPosition(){
+		String test1 = 'asdf\nasdf\n\n\n';
+		system.assertEquals(5, aci_Utils.getLineStartPosition(test1, 2));
+		system.assertEquals(0, aci_Utils.getLineStartPosition(test1, -1));
+		
+		String test2 = '1234\n567\n89';
+		system.assertEquals(5, aci_Utils.getLineStartPosition(test2, 2));
+		system.assertEquals(test2.length(), aci_Utils.getLineStartPosition(test2, 4));
+		system.assertEquals(0, aci_Utils.getLineStartPosition(test2, 1));
+	}
+	
+	public static testmethod void testGetLinesCoveredBySubstring(){
+		String str1 = '1234\n5678\n9';
+		system.assertEquals(3, aci_Utils.getLinesCoveredBySubstring(str1, 5, 10).get(1));	
 	}
 }

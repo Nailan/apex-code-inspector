@@ -4,9 +4,38 @@ public without sharing class aci_Utils {
         return str.replaceAll('\t', '').replaceAll(' ', '').replaceAll('\n', '');
     }
     
-    public static Integer getLineNumber(String str, Integer pos){
-        return str.subString(0, pos).countMatches('\n');
+    public static Integer getLineNumberOfPosition(String str, Integer pos){
+        return str.subString(0, pos).countMatches('\n') + 1;
     }
+    
+    public static Integer getTotalLines(String str){
+    	return str.countMatches('\n') + 1;
+    }
+    
+    public static List<Integer> getLinesCoveredBySubstring(String str, Integer substrStartindex, Integer substrEndIndex){
+    	List<Integer> lines = new List<Integer>();
+    	for(Integer i = getLineNumberOfPosition(str, substrStartindex); i<= getLineNumberOfPosition(str, substrEndIndex); i++){
+    		lines.add(i);
+    	}
+    	return lines;
+    }
+    
+    public static Integer getLineStartPosition(String body, Integer lineNumber){
+    	if(lineNumber <= 1){
+    		return 0;
+    	}
+    	if(lineNumber > body.countMatches('\n') + 1){
+    		return body.length();
+    	}
+    	Integer pos = 0;
+    	Integer lastIndex = 0;
+    	for(Integer i = 0; i < lineNumber - 1; i ++){
+    		lastIndex = body.indexOf('\n', pos);
+    		system.debug('last index=' + lastIndex);
+    		pos = lastIndex + 1;
+    	}
+    	return pos;
+    }    
     
     public static String castStringToACIFormat(String classBody){
         // //, /**/
