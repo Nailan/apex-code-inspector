@@ -1,4 +1,7 @@
 public without sharing class AnalysisDetail {
+	public class InvalidCodeFragmentException extends Exception{}
+	
+	private final static Integer MAX_CODE_LENGTH = 32000;
 	private aci_Inspect_Detail__c detail;
 	
 	public AnalysisDetail(aci_Inspect_Detail__c d){
@@ -13,7 +16,7 @@ public without sharing class AnalysisDetail {
 		detail.Message__c = m;
 	}
 	
-	public void setStartLine(Integer stLine){
+	public void setStartLineNumber(Integer stLine){
 		detail.Start_Line__c = stLine;	
 	}
 	
@@ -21,8 +24,15 @@ public without sharing class AnalysisDetail {
 		detail.End_Line__c = endL;
 	}
 	
-	public void addVisibleLine(Integer pos){
+	public void addLineToHighlight(Integer pos){
 		detail.Lines__c = detail.Lines__c + String.valueOf(pos) + ';';
+	}
+	
+	public void setLinesToHighlight(List<Integer> lines){
+		detail.Lines__c = '';
+		for(Integer l : lines){
+			detail.Lines__c = detail.Lines__c + String.valueOf(l) + ';';	
+		}
 	}
 	
 	public SObject getSObject(Id resultObjId){
@@ -57,5 +67,5 @@ public without sharing class AnalysisDetail {
 	public void setCodeFragment(String fr){
 		detail.Code_Fragment__c = fr;
 	}
-	
+
 }
