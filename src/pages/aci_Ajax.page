@@ -23,7 +23,7 @@
 
 <apex:actionStatus id="FullPageStatusShowOnly" 
     onstart="showAjax()"
-    onstop="">
+    onstop="j$('#ajaxImage').css('display', 'none');">
 </apex:actionStatus>
 
 <apex:actionStatus id="PagesTreeStatus" 
