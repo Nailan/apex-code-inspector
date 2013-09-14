@@ -187,13 +187,15 @@ public with sharing class aci_ApexCodeInspector {
 		for(InspectorWrapper ci : classInspectors){
 			if(ci.isSelected){
 				try{
+					system.debug('######## inspecting ' + cl.Name + ' with ' + ci.classInspector.getName());
 					AnalysisResult res = ci.classInspector.inspectClass(cl.Body);
 					res.setInspectorName(ci.classInspector.getName());
 					res.setItemName(cl.Name);
 					results.add(res);
+					system.debug('######## status=' + res.getStatus());
 				}
 				catch(Exception e){
-					errorsDuringInspecting.add('Error occured due inspecting by ' + ci.classInspector.getName()
+					errorsDuringInspecting.add('An error occured due inspecting by ' + ci.classInspector.getName()
 											 + ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString());
 				}
 			}	
@@ -214,7 +216,7 @@ public with sharing class aci_ApexCodeInspector {
 					results.add(res);
 				}
 				catch(Exception e){
-					errorsDuringInspecting.add('Error occured due inspecting by ' + ci.triggerInspector.getName() 
+					errorsDuringInspecting.add('An error occured due inspecting by ' + ci.triggerInspector.getName() 
 											+ ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString());
 				}
 			}	
@@ -252,6 +254,10 @@ public with sharing class aci_ApexCodeInspector {
 		return false;
 	}
 	
+	public boolean getIsAnalyzingWithoutErrors(){
+		return errorsDuringInspecting.size() == 0;
+	}
+	
 	public void saveResults(){
 		AnalysisExecution ex = new AnalysisExecution();
 		ex.setExecutionTime(system.now());
@@ -263,9 +269,14 @@ public with sharing class aci_ApexCodeInspector {
 			}
 		}
 		ex.setResults(ress);
-		ex.save();
 		isSaved = true;
-		ApexPages.addMessage(new ApexPages.message(ApexPages.severity.CONFIRM, 'Saved'));
+		try{
+			ex.save();
+			ApexPages.addMessage(new ApexPages.message(ApexPages.severity.CONFIRM, 'Saved'));
+		}
+		catch(Exception e){
+			ApexPages.addMessage(new ApexPages.message(ApexPages.severity.WARNING, 'Cannot be saved: ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString()));	
+		}
 	}
 	
 	public Pagereference toHistory(){
