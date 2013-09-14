@@ -14,5 +14,8 @@ public with sharing class aci_tt_cov_UncompleteCodeInspector {
 		
 		String test4 = '/*asdfasdfasdf to doasdfasd*/';
 		system.assertEquals(AnalysisResult.STATUS_OK,  ins.inspectClass(test4).getStatus());
+		
+		String test5 = '//todo: finish\n';
+		system.assertEquals(AnalysisResult.STATUS_WARNING,  ins.inspectClass(test5).getStatus());
 	}
 }

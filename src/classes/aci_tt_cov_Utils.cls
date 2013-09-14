@@ -26,6 +26,9 @@ public with sharing class aci_tt_cov_Utils {
 		
 		String strLit = '1234\'asdf\'567\'asdf\'';
 		system.assertEquals('1234######567######', aci_Utils.castStringToACIFormat(strLit));
+		
+		String newLineCom = '1234//adfasdf\n5678';
+		system.assertEquals('1234#########\n5678', aci_Utils.castStringToACIFormat(newLineCom));
 	}
 	
 	public static testmethod void testGetScopesRanges(){
