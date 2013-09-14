@@ -38,8 +38,13 @@ public without sharing class aci_Utils {
     }    
     
     public static String castStringToACIFormat(String classBody){
-        // //, /**/
-        String starsCommentRegEx = '(/\\*(?:.|[\\n\\r])*?\\*/)|(//[^\n]{0,}\n)';
+        classBody = replaceAllCommentsWithGridSymbol(classBody);
+        classBody = replaceAllStringLiteralsWithGridSymbol(classBody);
+        return classBody;
+    }
+    
+    public static String replaceAllCommentsWithGridSymbol(String classBody){
+    	String starsCommentRegEx = '(/\\*(?:.|[\\n\\r])*?\\*/)|(//[^\n]{0,}\n)';
         Pattern starsComPat = Pattern.compile(starsCommentRegEx);
         Matcher starsComMat = starsComPat.matcher(classBody);
         Integer startPos = 0;
@@ -48,17 +53,23 @@ public without sharing class aci_Utils {
             classBody = classBody.replace(starsComMat.group(), getPlaceholder(starsComMat.group()));
             startPos = starsComMat.end();       
         }
-        // ''
-        String stringLiteralRegEx = '\'[^\']*\'';
+        return classBody;	
+    }
+    
+    public static String replaceAllStringLiteralsWithGridSymbol(String classBody){
+    	String stringLiteralRegEx = '\'[^\']*\'';
         Pattern stringLitPat = Pattern.compile(stringLiteralRegEx);
         Matcher stringLitMat = stringLitPat.matcher(classBody);
-        startPos = 0;
+        Integer startPos = 0;
+        Integer endPos = classBody.length();
         while(stringLitMat.region(startPos, endPos).find()){
             classBody = classBody.replace(stringLitMat.group(), getPlaceholder(stringLitMat.group()));
             startPos = stringLitMat.end();          
         }
-        return classBody;
+        return classBody;	
     }
+    
+    
     
     private static String getPlaceholder(String str){
         String placeHolder = '';
