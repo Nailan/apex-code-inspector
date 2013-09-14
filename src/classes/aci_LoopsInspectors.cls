@@ -97,6 +97,7 @@ public with sharing class aci_LoopsInspectors {
 	private static AnalysisResult inspectItem(String body, String InterRegExp, String message, String statusIfFounded){
 		AnalysisResult result = new AnalysisResult();
 		result.setStatus(AnalysisResult.STATUS_OK);
+		String copyBody = body;
 		body = aci_Utils.castStringToACIFormat(body);
 		Pattern loopPat = Pattern.compile(LOOP_REG_EX);
 		Matcher loopMatch = loopPat.matcher(body);
@@ -115,7 +116,7 @@ public with sharing class aci_LoopsInspectors {
 				result.setStatus(statusIfFounded);
 				AnalysisDetail det = new AnalysisDetail();
 				det.setMessage(message + '. Line ' + aci_Utils.getLineNumberOfPosition(body, loopMatch.start() + interMatch.start()));
-				det.setCodeFragment(body);
+				det.setCodeFragment(copyBody);
 				det.setStartLineNumber(1);
 				det.setLinesToHighlight(aci_Utils.getLinesCoveredBySubstring(body, loopMatch.start() + interMatch.start(), loopMatch.start() + interMatch.end()));
 				system.debug('########### lines to highlight=' + det.getLinesToHighlight());
