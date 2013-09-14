@@ -13,6 +13,7 @@ public with sharing class aci_UncompleteCodeInspector implements aci_ApexCodeIns
 	}
 	
 	private AnalysisResult inspectItem(String body){
+		body = aci_Utils.replaceAllStringLiteralsWithGridSymbol(body);
 		AnalysisResult r = new AnalysisResult();
 		r.setStatus(AnalysisResult.STATUS_OK);
 		Pattern commPat = Pattern.compile(COMMENT_REG_EXP);
