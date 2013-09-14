@@ -55,7 +55,7 @@
 			<apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus" rerender="whole_page"/>
-					<apex:commandButton value="Start Analysis" title="Start" action="{!startInspecting}" rerender="whole_page" oncomplete="startAnalysis();"/>
+					<apex:commandButton value="Start Analysis" title="Start" action="{!startInspecting}" status="FullPageStatusShowOnly" rerender="whole_page" oncomplete="startAnalysis();"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockTable value="{!classInspectors}" var="ins" id="class_inspectors_table" rendered="{!mode == 'class_inspecting'}">
 					<apex:column headerValue="Select">
@@ -86,32 +86,35 @@
 				</apex:pageblockbuttons>
 				<apex:repeat value="{!itemNames}" var="itemName" id="results_table">
 					<apex:pageblockSection title="Results for {!itemName}" columns="1">
-						<apex:pageblockTable value="{!itemNameResultMap[itemName]}" var="res" title="Results for {!itemName}">
-							<apex:column headerValue="Status" width="20%">
+						<apex:pageBlockTable value="{!itemNameResultMap[itemName]}" var="res" title="Results for {!itemName}" width="100%">
+							<apex:column styleClass="statusColumn" headerValue="Status" width="20%">
 								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/warning.png')}" rendered="{!res.Status == 'Warning'}"/>
 								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/good.png')}" rendered="{!res.Status == 'Ok'}"/>
 								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/error.png')}" rendered="{!res.Status == 'Error'}"/>
 								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/info.png')}" rendered="{!res.Status == 'Info'}"/>
 							</apex:column>
-							<apex:column headerValue="Inspector Name" width="30%">
+							<apex:column styleClass="inspectorNameColumn" headerValue="Inspector Name" width="30%">
 								 {!res.InspectorName}
 							</apex:column>
-							<apex:column headerValue="Details" width="50%">
+							<apex:column styleClass="detailsColumn" headerValue="Details" width="50%">
 								<apex:repeat value="{!res.Details}" var="detail">
-									{!detail.Message}:<br/>
-									<c:aci_CodeFragment codeFragment="{!detail.CodeFragment}" rendered="{!detail.CodeFragment != null}"/>
+									<div class="detailsContainer">
+										<b>{!detail.Message}:</b><br/>
+										<c:aci_CodeFragment codeFragment="{!detail.CodeFragment}"/>
+									</div>
 								</apex:repeat>
 							</apex:column>
-						</apex:pageblockTable>
+						</apex:pageBlockTable>
 					</apex:pageblockSection>
 				</apex:repeat>
 			</apex:pageBlock>
 		</apex:pageblock>
 		<apex:actionFunction action="{!startInspecting}" name="startInspecting_af" rerender="error_panel"/>
 		<apex:actionFunction action="{!inspectNextItem}" name="inspectNextItem_af" rerender="currentItem"/>
-		<apex:actionFunction action="{!finishInspecting}" name="finishInspecting_af" status="FullPageStatus" oncomplete="window.scrollTo(0,0);" rerender="whole_page"/>
+		<apex:actionFunction action="{!finishInspecting}" name="finishInspecting_af" status="FullPageStatus" oncomplete="window.scrollTo(0,0);markCodeAreas();" rerender="whole_page"/>
 	</apex:form>
 <script>
+	
 	function startAnalysis(){
 		if(j$(j$('.error_panel')[0]).text().length == 0){
 			var itemsSize = j$(j$('.ItemsToInspectSize')[0]).val();;
@@ -123,9 +126,9 @@
 	function analyze(){
 		setTimeout(function(){
 			//alert('start!');
-			var curIt = j$(j$('.currentItem')[0]).text();
+			var curIt = parseInt(j$(j$('.currentItem')[0]).text());
 			//alert('current item =' + curIt);
-			var itemsToInsp = j$(j$('.ItemsToInspectSize')[0]).text();
+			var itemsToInsp = parseInt(j$(j$('.ItemsToInspectSize')[0]).text());
 			//alert('items =' + itemsToInsp);
 			changeProgressBarProgress(itemsToInsp, curIt);
 			inspectNextItem_af();
@@ -133,7 +136,7 @@
 				analyze();
 			}
 			else{
-				//alert('done!');
+				alert('done: ' + curIt + ' from ' + itemsToInsp);
 				hideProgressBar();
 				finishInspecting_af();	
 			}
@@ -141,6 +144,19 @@
 			,1000
 		)
 	}
+	
+	function markCodeAreas(){
+		var areas = j$('.codeArea');
+		//alert(areas.length);
+		for(var i = 0; i < areas.length; i ++){
+			var a = areas[i];
+			/*var content = j$(a).html();
+			j$(a).html("<pre escape=\"false\"><code escape=\"false\">" + hljs.fixMarkup(hljs.highlight("java", content).value, true, true) + "</code></pre>");*/
+			//hljs.highlightBlock(a, true, true);
+		}
+
+	}
+	
 </script>
 
 </apex:page>
