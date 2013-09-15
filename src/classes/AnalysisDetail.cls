@@ -56,8 +56,15 @@ public without sharing class AnalysisDetail {
 		return 0;
 	}
 	
-	public String getVisibleLines(){
-		return detail.Lines__c;
+	public List<Integer> getLinesToHighlight(){
+		List<Integer> result = new List<Integer>();
+		if(detail.Lines__c == null || detail.Lines__c.length() == 0){
+			return result;
+		}
+		for(String linStr : detail.Lines__c.split(';')){
+			result.add(Integer.valueOf(linStr));
+		}
+		return result;
 	}
 	
 	public String getCodeFragment(){
