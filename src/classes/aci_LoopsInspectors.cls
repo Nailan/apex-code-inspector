@@ -1,5 +1,5 @@
 public with sharing class aci_LoopsInspectors {
-	private static String LOOP_REG_EX = '(?i)([;\\{\\}]{1}[ \n\t\r]{0,}(for|while)[ \n\t\r]{0,}\\([^\\{]{1,})|([;\\{\\}]{1}[ \n\t\r]{0,}do[^\\{]{0,})';
+	private static String LOOP_REG_EX = '(?i)([;\\{\\}]{1}[ \n\t\r]{0,}(for|while)[ \n\t\r]{0,}\\([^\\{]{1,}\\)[ \n\t\r]{0,}\\{)|([;\\{\\}]{1}[ \n\t\r]{0,}do[ \n\t\r]{0,}\\{)';
 	
 	public class SOQLInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
 		private String SOQL_MESSAGE = 'A SOQL query in a loop found. ';
@@ -73,7 +73,7 @@ public with sharing class aci_LoopsInspectors {
 	
 	public class SendEmailInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
 		private String SEND_EMAIL_MESSAGE = 'A "Send Email" invocation in a loop found. ';
-		private String SEND_EMAIL_REG_EX = '(?i)[;\\{\\}]{1}[ \t\n\f\r]{0,}Messaging.sendEmail[^;]{1,};';
+		private String SEND_EMAIL_REG_EX = '(?i)[;\\{\\}\\)\\(]{1}[ \t\n\f\r]{0,}Messaging.sendEmail[^;]{1,};';
 		
 		public AnalysisResult inspectClass(String classBody){
 			AnalysisResult result = inspectItem(classBody, SEND_EMAIL_REG_EX, SEND_EMAIL_MESSAGE, AnalysisResult.STATUS_WARNING);
@@ -104,11 +104,12 @@ public with sharing class aci_LoopsInspectors {
 		Integer startIndex = 0;
 		Integer endIndex = body.length();
 		Map<Integer, Integer> scopes = aci_Utils.getScopesRanges(body);
-		//system.debug('########### scopes=' + scopes);
+		system.debug('########### scopes=' + scopes);
 		while(loopMatch.region(startIndex, endIndex).find()){
 			system.debug('########### loop def=' + loopMatch.group());
-			//system.debug('########### loop def end=' + loopMatch.end());
-			String loopBody = body.substring(loopMatch.end(), scopes.get(loopMatch.end()));
+			system.debug('########### loop def end=' + String.valueOf(loopMatch.end() - 1));
+			String loopBody = body.substring(loopMatch.end() - 1, scopes.get(loopMatch.end() - 1));
+			system.debug('########### body=' + loopBody);
 			Pattern interPat = Pattern.compile(InterRegExp);
 			Matcher interMatch = interPat.matcher(loopBody);
 			if(interMatch.find()){
@@ -117,9 +118,9 @@ public with sharing class aci_LoopsInspectors {
 				AnalysisDetail det = new AnalysisDetail();
 				det.setMessage(message + '. Line ' + aci_Utils.getLineNumberOfPosition(body, loopMatch.start() + interMatch.start()));
 				det.setCodeFragment(copyBody);
-				det.setStartLineNumber(1);
-				det.setLinesToHighlight(aci_Utils.getLinesCoveredBySubstring(body, loopMatch.start() + interMatch.start(), loopMatch.start() + interMatch.end()));
-				system.debug('########### lines to highlight=' + det.getLinesToHighlight());
+				//det.setStartLineNumber(1);
+				//det.setLinesToHighlight(aci_Utils.getLinesCoveredBySubstring(body, loopMatch.start() + interMatch.start(), loopMatch.start() + interMatch.end()));
+				//system.debug('########### lines to highlight=' + det.getLinesToHighlight());
 				result.addDetail(det);	
 			}
 			startIndex = loopMatch.end();

@@ -4,8 +4,17 @@ public with sharing class aci_tt_cov_LoopsInspectors {
 	public static testmethod void testSOQL(){
 		aci_LoopsInspectors.SOQLInspector soqlIns = new aci_LoopsInspectors.SOQLInspector();
 		
-		String str1 = ';for(Integer i = 0; i < 10; i ++){[select id from Account];}';
-		system.assertEquals(AnalysisResult.STATUS_WARNING, soqlIns.inspectClass(str1).getStatus());
+		String strFor = ';for(Integer i = 0; i < 10; i ++){[select id from Account];}';
+		system.assertEquals(AnalysisResult.STATUS_WARNING, soqlIns.inspectClass(strFor).getStatus());
+		
+		String strWh = 'method(){while(true){[select id from Account];}}';
+		system.assertEquals(AnalysisResult.STATUS_WARNING, soqlIns.inspectClass(strWh).getStatus());
+		
+		String strDo = 'method(){do{[select id from Account];}while(true)}';
+		system.assertEquals(AnalysisResult.STATUS_WARNING, soqlIns.inspectClass(strDo).getStatus());
+		
+		String strValid = 'methoddo(){[select id from Account];}';
+		system.assertEquals(AnalysisResult.STATUS_OK, soqlIns.inspectClass(strValid).getStatus());
 	}
 	
 	public static testmethod void testSOSL(){
@@ -13,6 +22,9 @@ public with sharing class aci_tt_cov_LoopsInspectors {
 		
 		String str1 = ';for(Integer i = 0; i < 10; i ++){[find id in *];}';
 		system.assertEquals(AnalysisResult.STATUS_WARNING, soslIns.inspectClass(str1).getStatus());
+		
+		String str2 = ';do{[find id in *];}while(true)';
+		system.assertEquals(AnalysisResult.STATUS_WARNING, soslIns.inspectClass(str2).getStatus());
 	}
 	
 	public static testmethod void testDatabaseStatements(){
