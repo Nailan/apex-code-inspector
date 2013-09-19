@@ -1,7 +1,7 @@
 <apex:page >
 <apex:includeScript value="{!URLFOR($Resource.ACI, 'ACI/jquery/jquery.js')}" />
 <apex:includeScript value="{!URLFOR($Resource.ACI, 'ACI/jquery/ui.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.ACI, 'ACI/highlight/highlight.pack.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.ACI, 'ACI/google-code-prettify/prettify.js')}" />
 <script>
 	var j$ = jQuery.noConflict();
 	
@@ -17,7 +17,7 @@
 		showOpaque();
 		j$('.showInCenterContent').html(j$(el).html());
 		j$('.showInCenterDiv').show();
-		j$('.showInCenterDiv').draggable({handle: '.showInCenterHeader'});
+		//j$('.showInCenterDiv').draggable({handle: '.showInCenterHeader'});
 	}
 	
 	function expandCodeArea(divEl){
@@ -42,14 +42,13 @@
 		j$( '.progressBarContent').progressbar( 'destroy');
 	}
 	
-	
 </script>
 <div id="disablePageDiv"/>
 
 <div class="showInCenterDiv">
 	<div class="showInCenterHeader">
 		<span style="margin-left: 40%;"><b>Content:</b></span>
-		<img src="{!URLFOR($Resource.ACI, 'ACI/images/error.png')}" onclick="j$('.showInCenterDiv').hide(); hideOpaque();" style="margin-right:2px; margin-top:2px; float:right;"/>
+		<img src="{!URLFOR($Resource.ACI, 'ACI/images/close.png')}" onclick="j$('.showInCenterDiv').hide(); hideOpaque();" style="margin-right:2px; margin-top:2px; float:right;"/>
 	</div>
 	<div class="showInCenterContent"/>
 </div>

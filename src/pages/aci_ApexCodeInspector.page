@@ -86,7 +86,7 @@
 				</apex:pageblockbuttons>
 				<apex:repeat value="{!itemNames}" var="itemName" id="results_table">
 					<apex:pageblockSection title="Results for {!itemName}" columns="1">
-						<apex:pageBlockTable value="{!itemNameResultMap[itemName]}" var="res" title="Results for {!itemName}" width="100%">
+						<apex:pageBlockTable value="{!itemNameResultMap[itemName]}" var="res" title="Results for {!itemName}">
 							<apex:column styleClass="statusColumn" headerValue="Status" width="20%">
 								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/warning.png')}" rendered="{!res.Status == 'Warning'}"/>
 								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/good.png')}" rendered="{!res.Status == 'Ok'}"/>
@@ -107,6 +107,9 @@
 						</apex:pageBlockTable>
 					</apex:pageblockSection>
 				</apex:repeat>
+				<script>
+					prettyPrint();
+				</script>
 			</apex:pageBlock>
 		</apex:pageblock>
 		<apex:actionFunction action="{!startInspecting}" name="startInspecting_af" rerender="error_panel"/>
@@ -143,18 +146,6 @@
 			}
 			,1000
 		)
-	}
-	
-	function markCodeAreas(){
-		var areas = j$('.codeArea');
-		//alert(areas.length);
-		for(var i = 0; i < areas.length; i ++){
-			var a = areas[i];
-			/*var content = j$(a).html();
-			j$(a).html("<pre escape=\"false\"><code escape=\"false\">" + hljs.fixMarkup(hljs.highlight("java", content).value, true, true) + "</code></pre>");*/
-			//hljs.highlightBlock(a, true, true);
-		}
-
 	}
 	
 </script>

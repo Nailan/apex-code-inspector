@@ -1,6 +1,6 @@
 <apex:page >
 <apex:styleSheet value="{!URLFOR($Resource.ACI, 'ACI/jquery/jquery-ui.css')}"/>
-<apex:styleSheet value="{!URLFOR($Resource.ACI, 'ACI/highlight/styles/idea.css')}"/>
+<apex:styleSheet value="{!URLFOR($Resource.ACI, 'ACI/google-code-prettify/prettify.css')}"/>
 <style>
 	.codeArea{
 		height: 200px;
@@ -8,8 +8,19 @@
 		cursor: pointer !important;
 		background-color: white;
 	}
-	code{
-		font-size: 110% !important;
+	.codeArea li{
+		list-style-type: inherit;
+		 background: inherit;
+	}
+	.showInCenterContent li{
+		list-style-type: inherit;
+		background: inherit;	
+	}
+	.codeArea pre{
+		border: 0px;
+	}
+	.showInCenterContent pre{
+		border: 0px;
 	}
 </style>
 <style>
