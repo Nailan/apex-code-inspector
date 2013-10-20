@@ -44,12 +44,14 @@ public without sharing class aci_Utils {
     }
     
     public static String replaceAllCommentsWithGridSymbol(String classBody){
-    	String starsCommentRegEx = '(/\\*(?:.|[\\n\\r])*?\\*/)|(//[^\n]{0,}\n)';
+    	system.debug('%%%%%%%%%%%%%%%%%%% classBody=' + classBody);
+    	String starsCommentRegEx = '(/\\*[^(\\*/)]{0,}\\*/)|(//[^\n]{0,}\n)';
         Pattern starsComPat = Pattern.compile(starsCommentRegEx);
         Matcher starsComMat = starsComPat.matcher(classBody);
         Integer startPos = 0;
         Integer endPos = classBody.length();
         while(starsComMat.region(startPos, endPos).find()){
+        	system.debug('~~~~~~~~ comment=' + starsComMat.group());
             classBody = classBody.replace(starsComMat.group(), getPlaceholder(starsComMat.group()));
             startPos = starsComMat.end();       
         }
@@ -116,6 +118,7 @@ public without sharing class aci_Utils {
         for(ApexClass cl : classes){
             String body = cl.Body;
             body = castStringToACIFormat(body);
+            system.debug('!!!!!!!! class loaded=' + cl.Name);
             if(!body.contains(interfaceName)){
                 continue;
             }

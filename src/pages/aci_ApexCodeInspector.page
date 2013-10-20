@@ -7,6 +7,7 @@
 			<apex:outputPanel styleClass="error_panel">
 				<apex:pagemessages id="error_panel"/>
 			</apex:outputPanel>
+			
 			<apex:pageBlock title="Please choose Items you want to analyze" rendered="{!currentStep == 1}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="History" title="History" action="{!toHistory}"/>
@@ -78,11 +79,11 @@
 					{!currentItemNumber}
 				</apex:outputPanel>	
 			</apex:pageBlock>
-		
-			<apex:pageBlock title="Results" rendered="{!currentStep == 3}">
+			
+			<apex:pageBlock title="Results" id="results_panel" rendered="{!currentStep == 3}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus"  rerender="whole_page"/>
-					<apex:commandButton value="Save To History" status="FullPageStatus" rerender="whole_page" action="{!saveResults}" disabled="{!isSaved}"/>
+					<apex:commandButton value="Save To History" status="FullPageStatus" action="{!saveResults}" disabled="{!isSaved}"/>
 				</apex:pageblockbuttons>
 				<apex:repeat value="{!itemNames}" var="itemName" id="results_table">
 					<apex:pageblockSection title="Results for {!itemName}" columns="1">
@@ -144,7 +145,7 @@
 				finishInspecting_af();	
 			}
 			}
-			,1000
+			,1500
 		)
 	}
 	
