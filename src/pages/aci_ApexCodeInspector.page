@@ -82,7 +82,7 @@
 			
 			<apex:pageBlock title="Results" id="results_panel" rendered="{!currentStep == 3}">
 				<apex:pageblockbuttons >
-					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus"  rerender="whole_page"/>
+					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus"/>
 					<apex:commandButton value="Save To History" status="FullPageStatus" action="{!saveResults}" disabled="{!isSaved}"/>
 				</apex:pageblockbuttons>
 				<apex:repeat value="{!itemNames}" var="itemName" id="results_table">
