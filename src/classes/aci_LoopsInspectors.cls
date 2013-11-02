@@ -132,7 +132,7 @@ public with sharing class aci_LoopsInspectors {
 			else{
 				det.setMessage(message + '. Lines ' + aci_Utils.getLineNumbersAsString(lineNumbers));	
 			}
-			det.setCodeFragment(body);
+			det.setCodeFragment(copyBody);
 			result.addDetail(det);
 		}
 		return result;			

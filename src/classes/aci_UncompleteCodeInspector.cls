@@ -1,6 +1,6 @@
 public with sharing class aci_UncompleteCodeInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
 	private static final String MESSAGE = 'TO DO comment detected';
-	private static final String COMMENT_REG_EXP = '(/\\*[^(\\*/)]{0,}\\*/)|(//[^\n]{0,}\n)';
+	private static final String COMMENT_REG_EXP = '(?s)(/\\*.*?\\*/)|(//[^\n]{0,}\n)';
 	private static final String TO_DO_REG_EXP = '(?i)to[ \t\n\f\r]{0,}do[^A-Za-z0-9]{1,}';
 	private static final Integer LINES_BEFORE_AFTER_COMMENT = 5;
 	

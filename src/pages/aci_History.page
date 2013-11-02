@@ -30,6 +30,12 @@
 				</apex:pageBlockSection>
 			</apex:repeat>
 		</apex:pageBlock>
+		<apex:outputPanel rendered="{!renderAs == 'html'}">
+			<style>
+				.pbSubheader{
+					color: black !important;
+				}
+			</style>
+		</apex:outputPanel>
 	</apex:form>
-	
 </apex:page>
