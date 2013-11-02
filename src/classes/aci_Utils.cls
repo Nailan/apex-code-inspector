@@ -46,7 +46,7 @@ public without sharing class aci_Utils {
     }
     
     public static String replaceAllCommentsWithGridSymbol(String classBody){
-    	String starsCommentRegEx = '(/\\*.*?\\*/)|(//[^\n]{0,}\n)';
+    	String starsCommentRegEx = '(?s)(/\\*.*?\\*/)|(//[^\n]{0,}\n)';
         Pattern starsComPat = Pattern.compile(starsCommentRegEx);
         Matcher starsComMat = starsComPat.matcher(classBody);
         Integer startPos = 0;
