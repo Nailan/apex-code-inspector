@@ -7,7 +7,7 @@
 			<apex:outputPanel styleClass="error_panel">
 				<apex:pagemessages id="error_panel"/>
 			</apex:outputPanel>
-			
+			<!-- GRAMMAR ERRORS -->
 			<apex:pageBlock title="Please choose Items you want to analyze" rendered="{!currentStep == 1}">
 				<apex:pageblockbuttons >
 					<apex:commandButton value="History" title="History" action="{!toHistory}"/>
@@ -37,16 +37,24 @@
 				</apex:pageblockSection>
 				<apex:pageblockSection columns="1" title="Available Classes" collapsible="false" rendered="{!mode == 'class_inspecting'}" id="classes_section">
 					<apex:pageblockTable value="{!classes}" var="class" id="classes_table" title="Available Classes">
-						<apex:column headerValue="Select">
-							<apex:inputCheckbox value="{!apexClassIsSelected[class.Id]}"/>
+						<apex:column >
+							<apex:facet name="header">
+								<input type="checkbox" onclick="selectAll(this, 'classes_select')" class="classes_control"/>
+							</apex:facet>
+							<apex:inputCheckbox value="{!apexClassIsSelected[class.Id]}" 
+												styleClass="classes_select" onclick="resetControl(this, 'classes_control')"/>
 						</apex:column>
 						<apex:column headerValue="Apex Class Name" value="{!class.Name}"/>
 					</apex:pageblockTable>
 				</apex:pageblockSection>
 				<apex:pageblockSection columns="1" title="Available Triggers" collapsible="false" rendered="{!mode == 'trigger_inspecting'}" id="triggers_section">
 					<apex:pageblockTable value="{!triggers}" var="trigger" id="triggers_table" title="Available Triggers">
-						<apex:column headerValue="Select">
-							<apex:inputCheckbox value="{!apexTriggerIsSelected[trigger.Id]}"/>
+						<apex:column >
+							<apex:facet name="header">
+								<input type="checkbox" onclick="selectAll(this, 'triggers_select')" class="triggers_control"/>
+							</apex:facet>
+							<apex:inputCheckbox value="{!apexTriggerIsSelected[trigger.Id]}"
+									styleClass="triggers_select" onclick="resetControl(this, 'triggers_control')"/>
 						</apex:column>
 						<apex:column headerValue="Apex Trigger Name" value="{!trigger.Name}"/>
 					</apex:pageblockTable>
@@ -59,15 +67,23 @@
 					<apex:commandButton value="Start Analysis" title="Start" action="{!startInspecting}" status="FullPageStatusShowOnly" rerender="whole_page" oncomplete="startAnalysis();"/>
 				</apex:pageblockbuttons>
 				<apex:pageblockTable value="{!classInspectors}" var="ins" id="class_inspectors_table" rendered="{!mode == 'class_inspecting'}">
-					<apex:column headerValue="Select">
-						<apex:inputCheckbox value="{!ins.IsSelected}"/> 
+					<apex:column >
+						<apex:facet name="header">
+							<input type="checkbox" onclick="selectAll(this, 'inspectors_select')" class="inspectors_control"/>
+						</apex:facet>
+						<apex:inputCheckbox value="{!ins.IsSelected}" styleClass="inspectors_select" 
+											onclick="resetControl(this, 'inspectors_control')"/> 
 					</apex:column>
 					<apex:column headerValue="Inspector Name" value="{!ins.classInspector.name}"/>
 					<apex:column headerValue="Inspector Description" value="{!ins.classInspector.description}"/>
 				</apex:pageblockTable>
 				<apex:pageblockTable value="{!triggerInspectors}" var="ins" id="trigger_inspectors_table" rendered="{!mode == 'trigger_inspecting'}">
 					<apex:column headerValue="Select">
-						<apex:inputCheckbox value="{!ins.IsSelected}"/> 
+						<apex:facet name="header">
+							<input type="checkbox" onclick="selectAll(this, 'triggers_inspectors_select')" class="triggers_inspectors_control"/>
+						</apex:facet>
+						<apex:inputCheckbox value="{!ins.IsSelected}" styleClass="triggers_inspectors_select"
+											onclick="resetControl(this, 'triggers_inspectors_control')"/> 
 					</apex:column>
 					<apex:column headerValue="Inspector Name" value="{!ins.triggerInspector.name}"/>
 					<apex:column headerValue="Inspector Description" value="{!ins.triggerInspector.description}"/>
@@ -109,7 +125,7 @@
 					</apex:pageblockSection>
 				</apex:repeat>
 				<script>
-					prettyPrint();
+                	prettyPrint();
 				</script>
 			</apex:pageBlock>
 		</apex:pageblock>
@@ -147,6 +163,21 @@
 			}
 			,1500
 		)
+	}
+	
+	function selectAll(input, classToSelect){
+		if(j$(input).is(':checked')){
+			j$('.' + classToSelect).attr('checked', 'checked');
+		}
+		else{
+			j$('.' + classToSelect).removeAttr('checked');	
+		}
+	}
+	
+	function resetControl(input, controlClass){
+		if(! j$(input).is(':checked')){
+			j$('.' + controlClass).removeAttr('checked');
+		}
 	}
 	
 </script>

@@ -195,7 +195,7 @@ public with sharing class aci_ApexCodeInspector {
 					system.debug('######## status=' + res.getStatus());
 				}
 				catch(Exception e){
-					errorsDuringInspecting.add('An error occured due inspecting by ' + ci.classInspector.getName()
+					errorsDuringInspecting.add('An error occured during inspecting ' + cl.Name + ' by ' + ci.classInspector.getName()
 											 + ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString());
 				}
 			}	
@@ -216,7 +216,7 @@ public with sharing class aci_ApexCodeInspector {
 					results.add(res);
 				}
 				catch(Exception e){
-					errorsDuringInspecting.add('An error occured due inspecting by ' + ci.triggerInspector.getName() 
+					errorsDuringInspecting.add('An error occured during inspecting ' + tr.Name + ' by ' + ci.triggerInspector.getName() 
 											+ ' ' + e.getMessage() + '. Stack Trace:' + e.getStackTraceString());
 				}
 			}	

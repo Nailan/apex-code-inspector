@@ -38,14 +38,15 @@ public without sharing class aci_Utils {
     }    
     
     public static String castStringToACIFormat(String classBody){
+    	system.debug('%%%%%%%%%%%%%%%%%%% classBody before cast=' + classBody);
         classBody = replaceAllCommentsWithGridSymbol(classBody);
         classBody = replaceAllStringLiteralsWithGridSymbol(classBody);
+        system.debug('%%%%%%%%%%%%%%%%%%% after=' + classBody);
         return classBody;
     }
     
     public static String replaceAllCommentsWithGridSymbol(String classBody){
-    	system.debug('%%%%%%%%%%%%%%%%%%% classBody=' + classBody);
-    	String starsCommentRegEx = '(/\\*[^(\\*/)]{0,}\\*/)|(//[^\n]{0,}\n)';
+    	String starsCommentRegEx = '(/\\*.*?\\*/)|(//[^\n]{0,}\n)';
         Pattern starsComPat = Pattern.compile(starsCommentRegEx);
         Matcher starsComMat = starsComPat.matcher(classBody);
         Integer startPos = 0;
@@ -112,9 +113,13 @@ public without sharing class aci_Utils {
         String classPat = '(?i)class[ \t\n\f\r]{1,}.[^{]{1,}';
         String classWithInterfaceRegex = '(?i)[ \t\n\f\r]{1,}implements[ \t\n\f\r]{1,}(.*[,]{1,}' + interfaceName + ')|(' + interfaceName + ')';
         String [] classNames = new List<String>();
-        for(ApexClass cl : [select id, Name, Body 
-                                from ApexClass
-                                where Status =: 'Active']){
+        String searchString = '\'*' + interfaceName + '*\'';
+        String query = 'FIND ' +  searchString + ' IN ALL FIELDS RETURNING ApexClass(Id, Body, Name)';
+        List<Sobject[]> results = search.query(query);
+        List<ApexClass> classes  = new List<ApexClass>();
+        if (results != null && results[0].size() != 0)
+        	classes = results[0];
+        for(ApexClass cl : classes){
             String body = cl.Body;
             body = castStringToACIFormat(body);
             system.debug('!!!!!!!! class loaded=' + cl.Name);
@@ -159,5 +164,16 @@ public without sharing class aci_Utils {
             }
         }
         return classNames;
+    }
+    
+    public static String getLineNumbersAsString(List<Integer> lineNumbers){
+    	String linesStr = '';
+		for(Integer i = 0; i < lineNumbers.size(); i ++){
+			linesStr += lineNumbers.get(i);
+			if(i != lineNumbers.size() - 1){
+				linesStr += ', ';
+			}
+		}
+		return linesStr;
     }
 }

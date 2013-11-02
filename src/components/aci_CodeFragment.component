@@ -1,6 +1,8 @@
 <apex:component controller="aci_CodeFragment">
 	<apex:attribute name="CodeFragment" type="String" assignTo="{!codeStr}" required="true" description="A fragment of Apex code"/>
-	<div class="codeArea" onclick="expandCodeArea(j$(this));">
-		<pre style="font-size: 9pt;" class="prettyprint linenums">{!code}</pre>
-	</div>
+	<apex:outputPanel rendered="{!isRendered}">
+		<div class="codeArea" onclick="expandCodeArea(j$(this));">
+			<pre style="font-size: 9pt;" class="prettyprint linenums">{!code}</pre>
+		</div>
+	</apex:outputPanel>
 </apex:component>

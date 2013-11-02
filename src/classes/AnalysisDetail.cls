@@ -1,8 +1,7 @@
 public without sharing class AnalysisDetail {
 	public class InvalidCodeFragmentException extends Exception{}
-	
-	private final static Integer MAX_CODE_LENGTH = 32000;
 	private aci_Inspect_Detail__c detail;
+	private String codeFragment; //shouldn't be saved into the DB because maximum text field length is only 32 000
 	
 	public AnalysisDetail(aci_Inspect_Detail__c d){
 		detail = d;	
@@ -68,11 +67,11 @@ public without sharing class AnalysisDetail {
 	}
 	
 	public String getCodeFragment(){
-		return detail.Code_Fragment__c;
+		return codeFragment;
 	}
 	
 	public void setCodeFragment(String fr){
-		detail.Code_Fragment__c = fr;
+		codeFragment = fr;
 	}
 
 }

@@ -20,7 +20,7 @@ public with sharing class aci_LoopsInspectors {
 		}	
 		
 		public String getDescription(){
-			return 'Checks optimal usage of SOQL queries';
+			return 'Checks optimal usage of SOQL queries in selected Classes or Triggers';
 		}
 		
 	}
@@ -63,7 +63,7 @@ public with sharing class aci_LoopsInspectors {
 		}
 		
 		public String getName(){
-			return 'Database Operations Analysist.';
+			return 'Database Operations Analyst.';
 		}	
 		
 		public String getDescription(){
@@ -86,11 +86,11 @@ public with sharing class aci_LoopsInspectors {
 		}
 		
 		public String getName(){
-			return '"Send Email" invocations Analysist.';
+			return '"Send Email" invocations Inspector';
 		}	
 		
 		public String getDescription(){
-			return 'Detects "Send Email" invocations in loops. Salesforce limit is 10 invocations per transaction.';
+			return 'Finds "SendEmail" (limited by Force.com) invocations in loops ';
 		}
 	}
 	
@@ -105,6 +105,7 @@ public with sharing class aci_LoopsInspectors {
 		Integer endIndex = body.length();
 		Map<Integer, Integer> scopes = aci_Utils.getScopesRanges(body);
 		system.debug('########### scopes=' + scopes);
+		List<Integer> lineNumbers = new List<Integer>();
 		while(loopMatch.region(startIndex, endIndex).find()){
 			system.debug('########### loop def=' + loopMatch.group());
 			system.debug('########### loop def end=' + String.valueOf(loopMatch.end() - 1));
@@ -115,15 +116,24 @@ public with sharing class aci_LoopsInspectors {
 			if(interMatch.find()){
 				system.debug('########### matching=' + interMatch.group());
 				result.setStatus(statusIfFounded);
-				AnalysisDetail det = new AnalysisDetail();
-				det.setMessage(message + '. Line ' + aci_Utils.getLineNumberOfPosition(body, loopMatch.start() + interMatch.start()));
-				det.setCodeFragment(copyBody);
+				lineNumbers.add(aci_Utils.getLineNumberOfPosition(body, loopMatch.start() + interMatch.start()));
+				// TO DO: make highlight 
 				//det.setStartLineNumber(1);
 				//det.setLinesToHighlight(aci_Utils.getLinesCoveredBySubstring(body, loopMatch.start() + interMatch.start(), loopMatch.start() + interMatch.end()));
-				//system.debug('########### lines to highlight=' + det.getLinesToHighlight());
-				result.addDetail(det);	
+				//system.debug('########### lines to highlight=' + det.getLinesToHighlight());	
 			}
 			startIndex = loopMatch.end();
+		}
+		if(result.getStatus() == statusIfFounded){
+			AnalysisDetail det = new AnalysisDetail();
+			if(lineNumbers.size() < 2){
+				det.setMessage(message + '. Line ' + String.valueOf(lineNumbers.get(0)));	
+			}
+			else{
+				det.setMessage(message + '. Lines ' + aci_Utils.getLineNumbersAsString(lineNumbers));	
+			}
+			det.setCodeFragment(copyBody);
+			result.addDetail(det);
 		}
 		return result;			
 	}

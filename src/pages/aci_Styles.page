@@ -98,6 +98,7 @@
 	margin: 5px;
 	padding: 5px;
 	border-radius: 5px;
+	max-width: 800px !important;
 }
 </style>
 </apex:page>

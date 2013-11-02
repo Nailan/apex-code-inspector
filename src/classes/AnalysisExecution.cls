@@ -50,13 +50,6 @@ public with sharing class AnalysisExecution {
 		List<SObject> toInsertDets = new List<SObject>();
 		for(AnalysisResult r: results){
 			Id rId = r.getSObjectId();
-			/*clean code fragment because of text area size is 64000,
-			but code fragment can be much more bigger. Moreover, 
-			History is a section with a cmmon information.
-			*/
-			for(AnalysisDetail d : r.getDetails()){
-				d.setCodeFragment('');
-			}
 			for(AnalysisDetail d: r.getDetails()){
 				toInsertDets.add(d.getSObject(rId));
 			}	

@@ -29,6 +29,13 @@ public with sharing class aci_tt_cov_Utils {
 		
 		String newLineCom = '1234//adfasdf\n5678';
 		system.assertEquals('1234#########\n5678', aci_Utils.castStringToACIFormat(newLineCom));
+		
+		String complex = '/**\n' +
+					    '* This method prevent task creations for Users w/o Permissions over parent Milestone of task.\n' +
+					    '* Checks if OWD for Milestone1_Milestone__c object are Private and then, checks if the current User have read/write permissons.\n' +
+					    '* The way to do it its if Milestone1_Milestone__share exist, so we need do a QueryString to avoid compilations errors if that Object doesn\'t exist.\n';
+		system.assertequals('1111', aci_Utils.castStringToACIFormat(complex).replaceAll('#', '').replaceAll('\n', '1'));
+    
 	}
 	
 	public static testmethod void testGetScopesRanges(){
