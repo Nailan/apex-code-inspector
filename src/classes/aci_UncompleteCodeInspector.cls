@@ -1,18 +1,23 @@
+/**
+ * @author Pavel Demeshchik
+ *
+ * Class contains "to do" comments finder plugin 
+ */
 public with sharing class aci_UncompleteCodeInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
 	private static final String MESSAGE = 'TO DO comment detected';
 	private static final String COMMENT_REG_EXP = '(?s)(/\\*.*?\\*/)|(//[^\n]{0,}\n)';
 	private static final String TO_DO_REG_EXP = '(?i)to[ \t\n\f\r]{0,}do[^A-Za-z0-9]{1,}';
 	private static final Integer LINES_BEFORE_AFTER_COMMENT = 5;
 	
-	public AnalysisResult inspectClass(String body){
+	public AnalysisResult inspectClass(String body) {
 		return inspectItem(body);
 	}
 	
-	public AnalysisResult inspectTrigger(String body){
+	public AnalysisResult inspectTrigger(String body) {
 		return inspectItem(body);
 	}
 	
-	private AnalysisResult inspectItem(String body){
+	private AnalysisResult inspectItem(String body) {
 		String cBody = body;
 		body = aci_Utils.replaceAllStringLiteralsWithGridSymbol(body);
 		AnalysisResult r = new AnalysisResult();
@@ -23,22 +28,22 @@ public with sharing class aci_UncompleteCodeInspector implements aci_ApexCodeIns
 		Integer endIndex = body.length();
 		Pattern todoPat = Pattern.compile(TO_DO_REG_EXP);
 		List<Integer> lineNumbers = new List<Integer>();
-		while(commMatch.region(startIndex, endIndex).find()){
+		while(commMatch.region(startIndex, endIndex).find()) {
 			system.debug('############# comment=' + commMatch.group());
 			startIndex = commMatch.end();
 			String comment = commMatch.group();
 			Matcher todoMat = todoPat.matcher(comment);
-			if(todoMat.find()){
+			if(todoMat.find()) {
 				lineNumbers.add(aci_Utils.getLineNumberOfPosition(body, commMatch.start() + todoMat.end()));
 				r.setStatus(AnalysisResult.STATUS_WARNING);
 			}
 		}
-		if(r.getStatus() == AnalysisResult.STATUS_WARNING){
+		if(r.getStatus() == AnalysisResult.STATUS_WARNING) {
 			AnalysisDetail det = new AnalysisDetail();
-			if(lineNumbers.size() < 2){
+			if(lineNumbers.size() < 2) {
 				det.setMessage(MESSAGE + '. Line ' + String.valueOf(lineNumbers.get(0)));	
 			}
-			else{
+			else {
 				det.setMessage(MESSAGE + '. Lines ' + aci_Utils.getLineNumbersAsString(lineNumbers));	
 			}
 			det.setCodeFragment(cBody);
@@ -47,11 +52,11 @@ public with sharing class aci_UncompleteCodeInspector implements aci_ApexCodeIns
 		return r;
 	}
 	
-	public String getName(){
+	public String getName() {
 		return '"TO DO" comments finder';
 	}
 	
-	public String getDescription(){
+	public String getDescription() {
 		return 'Finds "TO DO" comments in code ';
 	}
 

@@ -1,6 +1,11 @@
+/**
+ * @author Pavel Demeshchik
+ *
+ * Test class for aci_UncompleteCodeInspector.cls
+ */
 @isTest
 public with sharing class aci_tt_cov_UncompleteCodeInspector {
-	public static testmethod void testInspecting(){
+	public static testmethod void testInspecting() {
 		aci_UncompleteCodeInspector ins = new aci_UncompleteCodeInspector();
 		
 		String test1 = '/*TO DO: asdfasdfasdf*/';

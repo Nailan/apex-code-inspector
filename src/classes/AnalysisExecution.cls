@@ -1,56 +1,61 @@
-public with sharing class AnalysisExecution {
+/**
+ * @author Pavel Demeshchik
+ *
+ * Class-wrapper for aci_Analysis_Execution__c (persistence layer)
+ */
+ public with sharing class AnalysisExecution {
 	private aci_Analysis_Execution__c execution;
 	private List<AnalysisResult> results;
 	
-	public AnalysisExecution(){
+	public AnalysisExecution() {
 		execution = new aci_Analysis_Execution__c();
 		results = new List<AnalysisResult>();
 	}
 	
-	public AnalysisExecution(aci_Analysis_Execution__c ex){
+	public AnalysisExecution(aci_Analysis_Execution__c ex) {
 		execution = ex;
 		results = new List<AnalysisResult>();
 	}
 	
-	public void setExecutionTime(DateTime d){
+	public void setExecutionTime(DateTime d) {
 		execution.Execution_Time__c = d;
 	}
 	
-	public void setExecutedById(Id uId){
+	public void setExecutedById(Id uId) {
 		execution.Executed_By__c = uId;
 	}
 	
-	public DateTime getExecutionTime(){
+	public DateTime getExecutionTime() {
 		return execution.Execution_Time__c;
 	}
 	
-	public String getExecutedById(){
+	public String getExecutedById() {
 		return execution.Executed_By__c;
 	}
 	
-	public List<AnalysisResult> getResults(){
+	public List<AnalysisResult> getResults() {
 		return results;
 	}
 	
-	public void addResult(AnalysisResult r){
+	public void addResult(AnalysisResult r) {
 		results.add(r);
 	}
 	
-	public void setResults(List<AnalysisResult> ress){
+	public void setResults(List<AnalysisResult> ress) {
 		results = ress;
 	}
 	
-	public void save(){
+	public void save() {
 		insert execution;
 		List<SObject> toInsertResults = new List<SObject>();
-		for(AnalysisResult r: results){
+		for(AnalysisResult r: results) {
 			toInsertResults.add(r.getSobject(execution.Id));
 		}
 		insert toInsertResults;
 		List<SObject> toInsertDets = new List<SObject>();
-		for(AnalysisResult r: results){
+		for(AnalysisResult r: results) {
 			Id rId = r.getSObjectId();
-			for(AnalysisDetail d: r.getDetails()){
+			for(AnalysisDetail d: r.getDetails()) {
 				toInsertDets.add(d.getSObject(rId));
 			}	
 		}
