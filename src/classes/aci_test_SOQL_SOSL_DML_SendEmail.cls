@@ -7,6 +7,8 @@ public with sharing class aci_test_SOQL_SOSL_DML_SendEmail {
 			Account [] accounts = [select id from Account];
 			//SOSL
 			List<Sobject[]> objects = [FIND 'smth' IN ALL FIELDS RETURNING Account(id,name)];
+			//DML
+			update accounts;
 			//send email
 			Messaging.sendEmail(new List<Messaging.Email>());
 		}

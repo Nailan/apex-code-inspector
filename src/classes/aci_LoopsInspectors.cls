@@ -116,7 +116,7 @@ public with sharing class aci_LoopsInspectors {
 			if(interMatch.find()){
 				system.debug('########### matching=' + interMatch.group());
 				result.setStatus(statusIfFounded);
-				lineNumbers.add(aci_Utils.getLineNumberOfPosition(body, loopMatch.start() + interMatch.end()));
+				lineNumbers.add(aci_Utils.getLineNumberOfPosition(body, loopMatch.end() + interMatch.start() + 1));
 				// TO DO: make highlight 
 				//det.setStartLineNumber(1);
 				//det.setLinesToHighlight(aci_Utils.getLinesCoveredBySubstring(body, loopMatch.start() + interMatch.start(), loopMatch.start() + interMatch.end()));

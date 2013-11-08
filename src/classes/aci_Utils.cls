@@ -5,8 +5,7 @@ public without sharing class aci_Utils {
     }
     
     public static Integer getLineNumberOfPosition(String str, Integer pos){
-    	system.debug('$$$$$$$$$ position=' + str.subString(0, pos));
-        return str.subString(0, pos + 1).countMatches('\n') + 1;
+        return str.subString(0, pos).countMatches('\n') + 1;
     }
     
     public static Integer getTotalLines(String str){
