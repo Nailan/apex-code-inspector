@@ -1,0 +1,15 @@
+<apex:page controller="aci_test">
+<apex:include pageName="aci_Scripts"/>
+<apex:include pageName="aci_Styles"/>
+<c:aci_CodeFragment codeFragment="{!cl.Body}"/>
+<script>
+	prettyPrint();
+</script>
+<div class="asdf">
+	<script>
+		alert(this);
+		alert(j$(this).parent().attr('class'));
+	</script>
+</div>
+
+</apex:page>

@@ -182,7 +182,11 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public void inspectNextClass(){
-		ApexClass cl = classes.get(getNextItemToInspect());
+		Integer nextIndex = getNextItemToInspect();
+		if(nextIndex == null){
+			return;
+		}
+		ApexClass cl = classes.get(nextIndex);
 		AnalysisResult [] results = new List<AnalysisResult>();
 		for(InspectorWrapper ci : classInspectors){
 			if(ci.isSelected){
@@ -205,7 +209,11 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public void inspectNextTrigger(){
-		ApexTrigger tr = triggers.get(getNextItemToInspect());
+		Integer nextIndex = getNextItemToInspect();
+		if(nextIndex == null){
+			return;
+		}
+		ApexTrigger tr = triggers.get(nextIndex);
 		AnalysisResult [] results = new List<AnalysisResult>();
 		for(InspectorWrapper ci : triggerInspectors){
 			if(ci.isSelected){
@@ -304,7 +312,7 @@ public with sharing class aci_ApexCodeInspector {
 	
 	public Integer getNextItemToInspect(){
 		Integer itemNumber = 0;
-		Integer retIndex = 0;
+		Integer retIndex = null;
 		if(mode == 'class_inspecting'){
 			for(Integer i = 0; i < classes.size(); i ++){
 				ApexClass cl = classes.get(i);

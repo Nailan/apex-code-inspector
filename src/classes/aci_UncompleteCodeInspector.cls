@@ -29,7 +29,7 @@ public with sharing class aci_UncompleteCodeInspector implements aci_ApexCodeIns
 			String comment = commMatch.group();
 			Matcher todoMat = todoPat.matcher(comment);
 			if(todoMat.find()){
-				lineNumbers.add(aci_Utils.getLineNumberOfPosition(body, commMatch.start() + todoMat.start()));
+				lineNumbers.add(aci_Utils.getLineNumberOfPosition(body, commMatch.start() + todoMat.end()));
 				r.setStatus(AnalysisResult.STATUS_WARNING);
 			}
 		}
@@ -48,7 +48,7 @@ public with sharing class aci_UncompleteCodeInspector implements aci_ApexCodeIns
 	}
 	
 	public String getName(){
-		return 'Uncompleted code Analyst';
+		return '"TO DO" comments finder';
 	}
 	
 	public String getDescription(){

@@ -2,184 +2,184 @@
 <apex:include pageName="aci_Scripts"/>
 <apex:include pageName="aci_Styles"/>
 <apex:include pageName="aci_Ajax"/>
-	<apex:form >
-		<apex:pageblock title="Apex Code Quality Analyst" id="whole_page">
-			<apex:outputPanel styleClass="error_panel">
-				<apex:pagemessages id="error_panel"/>
-			</apex:outputPanel>
-			<!-- GRAMMAR ERRORS -->
-			<apex:pageBlock title="Please choose Items you want to analyze" rendered="{!currentStep == 1}">
-				<apex:pageblockbuttons >
-					<apex:commandButton value="History" title="History" action="{!toHistory}"/>
-					<apex:commandButton value="Next" title="Select" action="{!toSecondStep}" rerender="whole_page" oncomplete="window.scrollTo(0,0);" status="FullPageStatus"/>
-				</apex:pageblockbuttons>
-				<apex:pageblockSection columns="1" title="Filter" collapsible="false">
-					<apex:pageblockSectionItem >
-						<apex:outputLabel value="Number of items to show"/>
-						<apex:selectList value="{!numberOfItemsToShow}" size="1" multiselect="false" label="Show items in table:">
-							<apex:selectoption itemValue="10"/>
-							<apex:selectoption itemValue="50"/>
-							<apex:selectoption itemValue="100"/>
-						</apex:selectList>
-					</apex:pageblockSectionItem>
-					<apex:pageblockSectionItem >
-						<apex:outputLabel value="Items to inspect"/>
-						<apex:selectList value="{!modeInFilter}" size="1" multiselect="false">
-							<apex:selectoption itemValue="class_inspecting" itemLabel="Apex Classes"/>
-							<apex:selectoption itemValue="trigger_inspecting" itemLabel="Apex Triggers"/>
-						</apex:selectList>
-					</apex:pageblockSectionItem>
-					<apex:pageblockSectionItem >
-						<apex:outputLabel value="Name"/>
-						<apex:inputText value="{!searchByName}"/>
-					</apex:pageblockSectionItem>
-					<apex:commandButton value="Apply Filter" action="{!applyFilter}" rerender="whole_page" status="FullPageStatus" style="margin-left:300px;"/>
-				</apex:pageblockSection>
-				<apex:pageblockSection columns="1" title="Available Classes" collapsible="false" rendered="{!mode == 'class_inspecting'}" id="classes_section">
-					<apex:pageblockTable value="{!classes}" var="class" id="classes_table" title="Available Classes">
-						<apex:column >
-							<apex:facet name="header">
-								<input type="checkbox" onclick="selectAll(this, 'classes_select')" class="classes_control"/>
-							</apex:facet>
-							<apex:inputCheckbox value="{!apexClassIsSelected[class.Id]}" 
-												styleClass="classes_select" onclick="resetControl(this, 'classes_control')"/>
-						</apex:column>
-						<apex:column headerValue="Apex Class Name" value="{!class.Name}"/>
-					</apex:pageblockTable>
-				</apex:pageblockSection>
-				<apex:pageblockSection columns="1" title="Available Triggers" collapsible="false" rendered="{!mode == 'trigger_inspecting'}" id="triggers_section">
-					<apex:pageblockTable value="{!triggers}" var="trigger" id="triggers_table" title="Available Triggers">
-						<apex:column >
-							<apex:facet name="header">
-								<input type="checkbox" onclick="selectAll(this, 'triggers_select')" class="triggers_control"/>
-							</apex:facet>
-							<apex:inputCheckbox value="{!apexTriggerIsSelected[trigger.Id]}"
-									styleClass="triggers_select" onclick="resetControl(this, 'triggers_control')"/>
-						</apex:column>
-						<apex:column headerValue="Apex Trigger Name" value="{!trigger.Name}"/>
-					</apex:pageblockTable>
-				</apex:pageblockSection>
-			</apex:pageBlock>
-			
-			<apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
-				<apex:pageblockbuttons >
-					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus" rerender="whole_page"/>
-					<apex:commandButton value="Start Analysis" title="Start" action="{!startInspecting}" status="FullPageStatusShowOnly" rerender="whole_page" oncomplete="startAnalysis();"/>
-				</apex:pageblockbuttons>
-				<apex:pageblockTable value="{!classInspectors}" var="ins" id="class_inspectors_table" rendered="{!mode == 'class_inspecting'}">
-					<apex:column >
-						<apex:facet name="header">
-							<input type="checkbox" onclick="selectAll(this, 'inspectors_select')" class="inspectors_control"/>
-						</apex:facet>
-						<apex:inputCheckbox value="{!ins.IsSelected}" styleClass="inspectors_select" 
-											onclick="resetControl(this, 'inspectors_control')"/> 
-					</apex:column>
-					<apex:column headerValue="Inspector Name" value="{!ins.classInspector.name}"/>
-					<apex:column headerValue="Inspector Description" value="{!ins.classInspector.description}"/>
-				</apex:pageblockTable>
-				<apex:pageblockTable value="{!triggerInspectors}" var="ins" id="trigger_inspectors_table" rendered="{!mode == 'trigger_inspecting'}">
-					<apex:column headerValue="Select">
-						<apex:facet name="header">
-							<input type="checkbox" onclick="selectAll(this, 'triggers_inspectors_select')" class="triggers_inspectors_control"/>
-						</apex:facet>
-						<apex:inputCheckbox value="{!ins.IsSelected}" styleClass="triggers_inspectors_select"
-											onclick="resetControl(this, 'triggers_inspectors_control')"/> 
-					</apex:column>
-					<apex:column headerValue="Inspector Name" value="{!ins.triggerInspector.name}"/>
-					<apex:column headerValue="Inspector Description" value="{!ins.triggerInspector.description}"/>
-				</apex:pageblockTable>
-				<apex:outputPanel styleclass="ItemsToInspectSize" id="ItemsToInspectSize" style="display:none;">
-					{!ItemsToInspectSize}
-				</apex:outputPanel>	
-				<apex:outputPanel styleclass="currentItem" id="currentItem" style="display:none;">
-					{!currentItemNumber}
-				</apex:outputPanel>	
-			</apex:pageBlock>
-			
-			<apex:pageBlock title="Results" id="results_panel" rendered="{!currentStep == 3}">
-				<apex:pageblockbuttons >
-					<apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus"/>
-					<apex:commandButton value="Save To History" status="FullPageStatus" action="{!saveResults}" disabled="{!isSaved}"/>
-				</apex:pageblockbuttons>
-				<apex:repeat value="{!itemNames}" var="itemName" id="results_table">
-					<apex:pageblockSection title="Results for {!itemName}" columns="1">
-						<apex:pageBlockTable value="{!itemNameResultMap[itemName]}" var="res" title="Results for {!itemName}">
-							<apex:column styleClass="statusColumn" headerValue="Status" width="20%">
-								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/warning.png')}" rendered="{!res.Status == 'Warning'}"/>
-								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/good.png')}" rendered="{!res.Status == 'Ok'}"/>
-								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/error.png')}" rendered="{!res.Status == 'Error'}"/>
-								<apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/info.png')}" rendered="{!res.Status == 'Info'}"/>
-							</apex:column>
-							<apex:column styleClass="inspectorNameColumn" headerValue="Inspector Name" width="30%">
-								 {!res.InspectorName}
-							</apex:column>
-							<apex:column styleClass="detailsColumn" headerValue="Details" width="50%">
-								<apex:repeat value="{!res.Details}" var="detail">
-									<div class="detailsContainer">
-										<b>{!detail.Message}:</b><br/>
-										<c:aci_CodeFragment codeFragment="{!detail.CodeFragment}"/>
-									</div>
-								</apex:repeat>
-							</apex:column>
-						</apex:pageBlockTable>
-					</apex:pageblockSection>
-				</apex:repeat>
-				<script>
-                	prettyPrint();
-				</script>
-			</apex:pageBlock>
-		</apex:pageblock>
-		<apex:actionFunction action="{!startInspecting}" name="startInspecting_af" rerender="error_panel"/>
-		<apex:actionFunction action="{!inspectNextItem}" name="inspectNextItem_af" rerender="currentItem"/>
-		<apex:actionFunction action="{!finishInspecting}" name="finishInspecting_af" status="FullPageStatus" oncomplete="window.scrollTo(0,0);markCodeAreas();" rerender="whole_page"/>
-	</apex:form>
+    <apex:form >
+        <apex:pageblock title="Apex Code Quality Analyst" id="whole_page">
+            <apex:outputPanel styleClass="error_panel">
+                <apex:pagemessages id="error_panel"/>
+            </apex:outputPanel>
+            <!-- GRAMMAR ERRORS -->
+            <apex:pageBlock title="Please choose Items you want to analyze" rendered="{!currentStep == 1}">
+                <apex:pageblockbuttons >
+                    <apex:commandButton value="History" title="History" action="{!toHistory}"/>
+                    <apex:commandButton value="Next" title="Select" action="{!toSecondStep}" rerender="whole_page" oncomplete="window.scrollTo(0,0);" status="FullPageStatus"/>
+                </apex:pageblockbuttons>
+                <apex:pageblockSection columns="1" title="Filter" collapsible="false">
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="Number of items to show"/>
+                        <apex:selectList value="{!numberOfItemsToShow}" size="1" multiselect="false" label="Show items in table:">
+                            <apex:selectoption itemValue="10"/>
+                            <apex:selectoption itemValue="50"/>
+                            <apex:selectoption itemValue="100"/>
+                        </apex:selectList>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="Items to inspect"/>
+                        <apex:selectList value="{!modeInFilter}" size="1" multiselect="false">
+                            <apex:selectoption itemValue="class_inspecting" itemLabel="Apex Classes"/>
+                            <apex:selectoption itemValue="trigger_inspecting" itemLabel="Apex Triggers"/>
+                        </apex:selectList>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="Name"/>
+                        <apex:inputText value="{!searchByName}"/>
+                    </apex:pageblockSectionItem>
+                    <apex:commandButton value="Apply Filter" action="{!applyFilter}" rerender="whole_page" status="FullPageStatus" style="margin-left:300px;"/>
+                </apex:pageblockSection>
+                <apex:pageblockSection columns="1" title="Available Classes" collapsible="false" rendered="{!mode == 'class_inspecting'}" id="classes_section">
+                    <apex:pageblockTable value="{!classes}" var="class" id="classes_table" title="Available Classes">
+                        <apex:column >
+                            <apex:facet name="header">
+                                <input type="checkbox" onclick="selectAll(this, 'classes_select')" class="classes_control"/>
+                            </apex:facet>
+                            <apex:inputCheckbox value="{!apexClassIsSelected[class.Id]}" 
+                                                styleClass="classes_select" onclick="resetControl(this, 'classes_control')"/>
+                        </apex:column>
+                        <apex:column headerValue="Apex Class Name" value="{!class.Name}"/>
+                    </apex:pageblockTable>
+                </apex:pageblockSection>
+                <apex:pageblockSection columns="1" title="Available Triggers" collapsible="false" rendered="{!mode == 'trigger_inspecting'}" id="triggers_section">
+                    <apex:pageblockTable value="{!triggers}" var="trigger" id="triggers_table" title="Available Triggers">
+                        <apex:column >
+                            <apex:facet name="header">
+                                <input type="checkbox" onclick="selectAll(this, 'triggers_select')" class="triggers_control"/>
+                            </apex:facet>
+                            <apex:inputCheckbox value="{!apexTriggerIsSelected[trigger.Id]}"
+                                    styleClass="triggers_select" onclick="resetControl(this, 'triggers_control')"/>
+                        </apex:column>
+                        <apex:column headerValue="Apex Trigger Name" value="{!trigger.Name}"/>
+                    </apex:pageblockTable>
+                </apex:pageblockSection>
+            </apex:pageBlock>
+            
+            <apex:pageBlock title="Select Inspectors" rendered="{!currentStep == 2}">
+                <apex:pageblockbuttons >
+                    <apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus" rerender="whole_page"/>
+                    <apex:commandButton value="Start Analysis" title="Start" action="{!startInspecting}" status="FullPageStatusShowOnly" rerender="whole_page" oncomplete="startAnalysis();"/>
+                </apex:pageblockbuttons>
+                <apex:pageblockTable value="{!classInspectors}" var="ins" id="class_inspectors_table" rendered="{!mode == 'class_inspecting'}">
+                    <apex:column >
+                        <apex:facet name="header">
+                            <input type="checkbox" onclick="selectAll(this, 'inspectors_select')" class="inspectors_control"/>
+                        </apex:facet>
+                        <apex:inputCheckbox value="{!ins.IsSelected}" styleClass="inspectors_select" 
+                                            onclick="resetControl(this, 'inspectors_control')"/> 
+                    </apex:column>
+                    <apex:column headerValue="Inspector Name" value="{!ins.classInspector.name}"/>
+                    <apex:column headerValue="Inspector Description" value="{!ins.classInspector.description}"/>
+                </apex:pageblockTable>
+                <apex:pageblockTable value="{!triggerInspectors}" var="ins" id="trigger_inspectors_table" rendered="{!mode == 'trigger_inspecting'}">
+                    <apex:column headerValue="Select">
+                        <apex:facet name="header">
+                            <input type="checkbox" onclick="selectAll(this, 'triggers_inspectors_select')" class="triggers_inspectors_control"/>
+                        </apex:facet>
+                        <apex:inputCheckbox value="{!ins.IsSelected}" styleClass="triggers_inspectors_select"
+                                            onclick="resetControl(this, 'triggers_inspectors_control')"/> 
+                    </apex:column>
+                    <apex:column headerValue="Inspector Name" value="{!ins.triggerInspector.name}"/>
+                    <apex:column headerValue="Inspector Description" value="{!ins.triggerInspector.description}"/>
+                </apex:pageblockTable>
+                <apex:outputPanel styleclass="ItemsToInspectSize" id="ItemsToInspectSize" style="display:none;">
+                    {!ItemsToInspectSize}
+                </apex:outputPanel> 
+                <apex:outputPanel styleclass="currentItem" id="currentItem" style="display:none;">
+                    {!currentItemNumber}
+                </apex:outputPanel> 
+            </apex:pageBlock>
+            
+            <apex:pageBlock title="Results" id="results_panel" rendered="{!currentStep == 3}">
+                <apex:pageblockbuttons >
+                    <apex:commandButton value="Back" action="{!toFirstStep}" status="FullPageStatus"/>
+                    <apex:commandButton value="Save To History" status="FullPageStatus" action="{!saveResults}" disabled="{!isSaved}"/>
+                </apex:pageblockbuttons>
+                <apex:repeat value="{!itemNames}" var="itemName" id="results_table">
+                    <apex:pageblockSection title="Results for {!itemName}" columns="1">
+                        <apex:pageBlockTable value="{!itemNameResultMap[itemName]}" var="res" title="Results for {!itemName}">
+                            <apex:column styleClass="statusColumn" headerValue="Status" width="20%">
+                                <apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/warning.png')}" rendered="{!res.Status == 'Warning'}"/>
+                                <apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/good.png')}" rendered="{!res.Status == 'Ok'}"/>
+                                <apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/error.png')}" rendered="{!res.Status == 'Error'}"/>
+                                <apex:image url="{!URLFOR($Resource.ACI, 'ACI/images/info.png')}" rendered="{!res.Status == 'Info'}"/>
+                            </apex:column>
+                            <apex:column styleClass="inspectorNameColumn" headerValue="Inspector Name" width="30%">
+                                 {!res.InspectorName}
+                            </apex:column>
+                            <apex:column styleClass="detailsColumn" headerValue="Details" width="50%">
+                                <apex:repeat value="{!res.Details}" var="detail">
+                                    <div class="detailsContainer">
+                                        <b>{!detail.Message}:</b><br/>
+                                        <c:aci_CodeFragment codeFragment="{!detail.CodeFragment}"/>
+                                    </div>
+                                </apex:repeat>
+                            </apex:column>
+                        </apex:pageBlockTable>
+                    </apex:pageblockSection>
+                </apex:repeat>
+                <script>
+                    prettyPrint();
+                </script>
+            </apex:pageBlock>
+        </apex:pageblock>
+        <apex:actionFunction action="{!startInspecting}" name="startInspecting_af" rerender="error_panel"/>
+        <apex:actionFunction action="{!inspectNextItem}" name="inspectNextItem_af" rerender="currentItem"/>
+        <apex:actionFunction action="{!finishInspecting}" name="finishInspecting_af" status="FullPageStatus" oncomplete="window.scrollTo(0,0);markCodeAreas();" rerender="whole_page"/>
+    </apex:form>
 <script>
-	
-	function startAnalysis(){
-		if(j$(j$('.error_panel')[0]).text().length == 0){
-			var itemsSize = j$(j$('.ItemsToInspectSize')[0]).val();;
-			showProgressBar(itemsSize);
-			analyze();
-		}
-	}
-	
-	function analyze(){
-		setTimeout(function(){
-			//alert('start!');
-			var curIt = parseInt(j$(j$('.currentItem')[0]).text());
-			//alert('current item =' + curIt);
-			var itemsToInsp = parseInt(j$(j$('.ItemsToInspectSize')[0]).text());
-			//alert('items =' + itemsToInsp);
-			changeProgressBarProgress(itemsToInsp, curIt);
-			inspectNextItem_af();
-			if(curIt < itemsToInsp){
-				analyze();
-			}
-			else{
-				alert('done: ' + curIt + ' from ' + itemsToInsp);
-				hideProgressBar();
-				finishInspecting_af();	
-			}
-			}
-			,1500
-		)
-	}
-	
-	function selectAll(input, classToSelect){
-		if(j$(input).is(':checked')){
-			j$('.' + classToSelect).attr('checked', 'checked');
-		}
-		else{
-			j$('.' + classToSelect).removeAttr('checked');	
-		}
-	}
-	
-	function resetControl(input, controlClass){
-		if(! j$(input).is(':checked')){
-			j$('.' + controlClass).removeAttr('checked');
-		}
-	}
-	
+    
+    function startAnalysis(){
+        if(j$(j$('.error_panel')[0]).text().length == 0){
+            var itemsSize = j$(j$('.ItemsToInspectSize')[0]).val();;
+            showProgressBar(itemsSize);
+            analyze();
+        }
+    }
+    
+    function analyze(){
+        setTimeout(function(){
+            //alert('start!');
+            var curIt = parseInt(j$(j$('.currentItem')[0]).text());
+            //alert('current item =' + curIt);
+            var itemsToInsp = parseInt(j$(j$('.ItemsToInspectSize')[0]).text());
+            //alert('items =' + itemsToInsp);
+            changeProgressBarProgress(itemsToInsp, curIt);
+            inspectNextItem_af();
+            if(curIt < itemsToInsp){
+                analyze();
+            }
+            else{
+                //alert('Done: ' + curIt + ' of ' + itemsToInsp);
+                hideProgressBar();
+                finishInspecting_af();  
+            }
+            }
+            ,1500
+        )
+    }
+    
+    function selectAll(input, classToSelect){
+        if(j$(input).is(':checked')){
+            j$('.' + classToSelect).attr('checked', 'checked');
+        }
+        else{
+            j$('.' + classToSelect).removeAttr('checked');  
+        }
+    }
+    
+    function resetControl(input, controlClass){
+        if(! j$(input).is(':checked')){
+            j$('.' + controlClass).removeAttr('checked');
+        }
+    }
+    
 </script>
 
 </apex:page>
