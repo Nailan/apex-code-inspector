@@ -130,7 +130,7 @@
             </apex:pageBlock>
         </apex:pageblock>
         <apex:actionFunction action="{!startInspecting}" name="startInspecting_af" rerender="error_panel"/>
-        <apex:actionFunction action="{!inspectNextItem}" name="inspectNextItem_af" rerender="currentItem"/>
+        <apex:actionFunction action="{!inspectNextItem}" name="inspectNextItem_af" rerender="currentItem" oncomplete="analyze();"/>
         <apex:actionFunction action="{!finishInspecting}" name="finishInspecting_af" status="FullPageStatus" oncomplete="window.scrollTo(0,0);markCodeAreas();" rerender="whole_page"/>
     </apex:form>
 <script>
@@ -144,26 +144,19 @@
     }
     
     function analyze(){
-        setTimeout(function(){
-            //alert('start!');
-            var curIt = parseInt(j$(j$('.currentItem')[0]).text());
-            //alert('current item =' + curIt);
-            var itemsToInsp = parseInt(j$(j$('.ItemsToInspectSize')[0]).text());
-            //alert('items =' + itemsToInsp);
-            changeProgressBarProgress(itemsToInsp, curIt);
-            inspectNextItem_af();
-            if(curIt < itemsToInsp){
-                analyze();
-            }
-            else{
-                //alert('Done: ' + curIt + ' of ' + itemsToInsp);
-                hideProgressBar();
-                finishInspecting_af();  
-            }
-            }
-            ,1500
-        )
-    }
+		var curIt = parseInt(j$(j$('.currentItem')[0]).text());
+		//alert('current item =' + curIt);
+		var itemsToInsp = parseInt(j$(j$('.ItemsToInspectSize')[0]).text());
+		//alert('items =' + itemsToInsp);
+		changeProgressBarProgress(itemsToInsp, curIt);
+		if (curIt < itemsToInsp) {
+			inspectNextItem_af();
+		}
+		else{
+			hideProgressBar();
+			finishInspecting_af();	
+		}
+	}
     
     function selectAll(input, classToSelect){
         if(j$(input).is(':checked')){
