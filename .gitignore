@@ -2,6 +2,3 @@
 *.project
 Referenced Packages/*
 
-#ignore meta files
-*-meta.xml
-
