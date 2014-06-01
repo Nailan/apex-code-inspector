@@ -1,22 +1,20 @@
 /**
- * @author Pavel Demeshchik
- *
- * Class contains inspectors which work with loops
+ * Class contains loop inspectors.
  */
 public with sharing class aci_LoopsInspectors {
 	private static String LOOP_REG_EX = '(?i)([;{}#]{1}[ \n\t\r]{0,}(for|while)[ \n\t\r]{0,}\\([^{]{1,}\\)[ \n\t\r]{0,}\\{)|([;{}#]{1}[ \n\t\r]{0,}do[ \n\t\r]{0,}\\{)';
 	
-	public class SOQLInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
+	public class SOQLInspector implements aci_ClassInspector, aci_TriggerInspector {
 		private String SOQL_MESSAGE = 'A SOQL query in a loop found ';
 		private String SOQL_REG_EX = '(?i)\\[[ \t\n\f\r]{0,}select[ \t\n\f\r]{1,}[^]]{0,}\\]';
 		
-		public AnalysisResult inspectClass(String classBody) {
-			AnalysisResult result = inspectItem(classBody, SOQL_REG_EX, SOQL_MESSAGE, AnalysisResult.STATUS_WARNING);
+		public aci_AnalysisResult inspectClass(String classBody) {
+			aci_AnalysisResult result = inspectItem(classBody, SOQL_REG_EX, SOQL_MESSAGE, aci_AnalysisResult.STATUS_WARNING);
 			return result;
 		}
 		
-		public AnalysisResult inspectTrigger(String triggerBody) {
-			AnalysisResult result = inspectItem(triggerBody, SOQL_REG_EX, SOQL_MESSAGE, AnalysisResult.STATUS_WARNING);
+		public aci_AnalysisResult inspectTrigger(String triggerBody) {
+			aci_AnalysisResult result = inspectItem(triggerBody, SOQL_REG_EX, SOQL_MESSAGE, aci_AnalysisResult.STATUS_WARNING);
 			return result;
 		}
 		
@@ -30,17 +28,17 @@ public with sharing class aci_LoopsInspectors {
 		
 	}
 	
-	public class SOSLInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
+	public class SOSLInspector implements aci_ClassInspector, aci_TriggerInspector {
 		private String SOSL_MESSAGE = 'A SOSL query in a loop found ';
 		private String SOSL_REG_EX = '(?i)\\[[ \t\n\f\r]{0,}find[ \t\n\f\r]{1,}[^]]{0,}\\]';
 
-		public AnalysisResult inspectClass(String classBody) {
-			AnalysisResult result = inspectItem(classBody, SOSL_REG_EX, SOSL_MESSAGE, AnalysisResult.STATUS_WARNING);
+		public aci_AnalysisResult inspectClass(String classBody) {
+			aci_AnalysisResult result = inspectItem(classBody, SOSL_REG_EX, SOSL_MESSAGE, aci_AnalysisResult.STATUS_WARNING);
 			return result;
 		}
 		
-		public AnalysisResult inspectTrigger(String triggerBody) {
-			AnalysisResult result = inspectItem(triggerBody, SOSL_REG_EX, SOSL_MESSAGE, AnalysisResult.STATUS_WARNING);
+		public aci_AnalysisResult inspectTrigger(String triggerBody) {
+			aci_AnalysisResult result = inspectItem(triggerBody, SOSL_REG_EX, SOSL_MESSAGE, aci_AnalysisResult.STATUS_WARNING);
 			return result;
 		}
 		
@@ -53,17 +51,17 @@ public with sharing class aci_LoopsInspectors {
 		}
 	}
 	
-	public class DatabaseOperationsInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
+	public class DatabaseOperationsInspector implements aci_ClassInspector, aci_TriggerInspector {
 		private String DATABASE_MESSAGE = 'An operation with Database in a loop found ';
 		private String DATABASE_REG_EX = '(?i)(Database\\.[^;]{0,};)|([;{}#]{1}[ \t\n\f\r]{0,}((insert)|(update)|(delete)|(merge)|(undelete)|(upsert))[ \t\n\f\r]{1,})';
 		
-		public AnalysisResult inspectClass(String classBody) {
-			AnalysisResult result = inspectItem(classBody, DATABASE_REG_EX, DATABASE_MESSAGE, AnalysisResult.STATUS_WARNING);
+		public aci_AnalysisResult inspectClass(String classBody) {
+			aci_AnalysisResult result = inspectItem(classBody, DATABASE_REG_EX, DATABASE_MESSAGE, aci_AnalysisResult.STATUS_WARNING);
 			return result;
 		}
 		
-		public AnalysisResult inspectTrigger(String triggerBody) {
-			AnalysisResult result = inspectItem(triggerBody, DATABASE_REG_EX, DATABASE_MESSAGE, AnalysisResult.STATUS_WARNING);
+		public aci_AnalysisResult inspectTrigger(String triggerBody) {
+			aci_AnalysisResult result = inspectItem(triggerBody, DATABASE_REG_EX, DATABASE_MESSAGE, aci_AnalysisResult.STATUS_WARNING);
 			return result;
 		}
 		
@@ -76,17 +74,17 @@ public with sharing class aci_LoopsInspectors {
 		}
 	}
 	
-	public class SendEmailInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
+	public class SendEmailInspector implements aci_ClassInspector, aci_TriggerInspector {
 		private String SEND_EMAIL_MESSAGE = 'A "Send Email" invocation in a loop found ';
 		private String SEND_EMAIL_REG_EX = '(?i)[;{}#]{1}[ \t\n\f\r]{0,}Messaging.sendEmail[^;]{1,};';
 		
-		public AnalysisResult inspectClass(String classBody) {
-			AnalysisResult result = inspectItem(classBody, SEND_EMAIL_REG_EX, SEND_EMAIL_MESSAGE, AnalysisResult.STATUS_WARNING);
+		public aci_AnalysisResult inspectClass(String classBody) {
+			aci_AnalysisResult result = inspectItem(classBody, SEND_EMAIL_REG_EX, SEND_EMAIL_MESSAGE, aci_AnalysisResult.STATUS_WARNING);
 			return result;
 		}
 		
-		public AnalysisResult inspectTrigger(String triggerBody) {
-			AnalysisResult result = inspectItem(triggerBody, SEND_EMAIL_REG_EX, SEND_EMAIL_MESSAGE, AnalysisResult.STATUS_WARNING);
+		public aci_AnalysisResult inspectTrigger(String triggerBody) {
+			aci_AnalysisResult result = inspectItem(triggerBody, SEND_EMAIL_REG_EX, SEND_EMAIL_MESSAGE, aci_AnalysisResult.STATUS_WARNING);
 			return result;
 		}
 		
@@ -99,16 +97,16 @@ public with sharing class aci_LoopsInspectors {
 		}
 	}
 	
-	private static AnalysisResult inspectItem(String body, String InterRegExp, String message, String statusIfFounded) {
-		AnalysisResult result = new AnalysisResult();
-		result.setStatus(AnalysisResult.STATUS_OK);
+	private static aci_AnalysisResult inspectItem(String body, String InterRegExp, String message, String statusIfFounded) {
+		aci_AnalysisResult result = new aci_AnalysisResult();
+		result.setStatus(aci_AnalysisResult.STATUS_OK);
 		String copyBody = body;
-		body = aci_Utils.castStringToACIFormat(body);
+		body = aci_StringUtils.castStringToACIFormat(body);
 		Pattern loopPat = Pattern.compile(LOOP_REG_EX);
 		Matcher loopMatch = loopPat.matcher(body);
 		Integer startIndex = 0;
 		Integer endIndex = body.length();
-		Map<Integer, Integer> scopes = aci_Utils.getScopesRanges(body);
+		Map<Integer, Integer> scopes = aci_StringUtils.getScopesRanges(body);
 		List<Integer> lineNumbers = new List<Integer>();
 		while(loopMatch.region(startIndex, endIndex).find()) {
 			String loopBody = body.substring(loopMatch.end() - 1, scopes.get(loopMatch.end() - 1));
@@ -116,17 +114,17 @@ public with sharing class aci_LoopsInspectors {
 			Matcher interMatch = interPat.matcher(loopBody);
 			if(interMatch.find()) {
 				result.setStatus(statusIfFounded);
-				lineNumbers.add(aci_Utils.getLineNumberOfPosition(body, loopMatch.end() + interMatch.start() + 1));	
+				lineNumbers.add(aci_StringUtils.getLineNumberOfPosition(body, loopMatch.end() + interMatch.start() + 1));	
 			}
 			startIndex = loopMatch.end();
 		}
 		if(result.getStatus() == statusIfFounded) {
-			AnalysisDetail det = new AnalysisDetail();
+			aci_AnalysisDetail det = new aci_AnalysisDetail();
 			if(lineNumbers.size() < 2) {
 				det.setMessage(message + '. Line ' + String.valueOf(lineNumbers.get(0)));	
 			}
 			else {
-				det.setMessage(message + '. Lines ' + aci_Utils.getLineNumbersAsString(lineNumbers));	
+				det.setMessage(message + '. Lines ' + aci_StringUtils.getLineNumbersAsString(lineNumbers));	
 			}
 			det.setCodeFragment(copyBody);
 			result.addDetail(det);

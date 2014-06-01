@@ -1,11 +1,11 @@
 /**
- * @author Pavel Demeshchik
- *
  * Controller for aci_ApexCodeInspector.page
  */
 public with sharing class aci_ApexCodeInspector {
-	public static final String CLASS_INSPECTOR_INTERFACE = 'aci_ApexCodeInspector.ClassInspector';
-	public static final String TRIGGER_INSPECTOR_INTERFACE = 'aci_ApexCodeInspector.TriggerInspector';
+	private aci_ClassService classService;
+	private aci_TriggerService triggerService;
+	private aci_InspectorService inspectorService;
+	private aci_AnalysisService analysisService;
 	
 	public ApexClass [] classes{get;set;}
 	public Map<String, Boolean> apexClassIsSelected {get;set;}
@@ -13,7 +13,7 @@ public with sharing class aci_ApexCodeInspector {
 	public Map<String, Boolean> apexTriggerIsSelected {get;set;}
 	public Integer numberOfItemsToShow {get;set;}
 	public String searchByName{get;set;}
-	public Map<String, AnalysisResult[]> itemNameResultMap{get;set;}
+	public Map<String, aci_AnalysisResult[]> itemNameResultMap{get;set;}
 	public Integer currentStep{get;set;}
 	public String mode{get;set;}//class_inspecting, trigger_inspecting
 	public String modeInFilter{get;set;}
@@ -24,32 +24,25 @@ public with sharing class aci_ApexCodeInspector {
 	public boolean isSaved{get;set;}
 	private List<String> errorsDuringInspecting;
 	
-	public interface ClassInspector {
-		AnalysisResult inspectClass(String classBody);
-		String getName();
-		String getDescription();
-	}
-	
-	public interface TriggerInspector {
-		AnalysisResult inspectTrigger(String triggerBody);
-		String getName();
-		String getDescription();
-	}
-	
 	public class InspectorWrapper {
-		public ClassInspector classInspector{get;set;}
-		public TriggerInspector triggerInspector{get;set;}
+		public aci_ClassInspector classInspector{get;set;}
+		public aci_TriggerInspector triggerInspector{get;set;}
 		public Boolean isSelected{get;set;}
 		
-		public InspectorWrapper(ClassInspector clIn){
+		public InspectorWrapper(aci_ClassInspector clIn){
 			this.classInspector = clIn;
 		}
-		public InspectorWrapper(TriggerInspector trIn){
+		public InspectorWrapper(aci_TriggerInspector trIn){
 			this.triggerInspector = trIn;
 		}
 	}
 	
 	public aci_ApexCodeInspector() {
+		classService = aci_ClassService.getInstance();
+		triggerService = aci_TriggerService.getInstance();
+		inspectorService = aci_InspectorService.getInstance();
+		analysisService = aci_AnalysisService.getInstance();
+		
 		mode = 'class_inspecting';
 		saved = false;
 		initialize();
@@ -57,7 +50,7 @@ public with sharing class aci_ApexCodeInspector {
 	
 	public void initialize() {
 		currentItemNumber = 0;
-		itemNameResultMap = new Map<String, AnalysisResult[]>();
+		itemNameResultMap = new Map<String, aci_AnalysisResult[]>();
 		numberOfItemsToShow = 100;
 		currentStep = 1;
 		if(mode == 'class_inspecting') {
@@ -71,39 +64,19 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public void loadClasses() {
-		classes = [select id, Body, Name 
-				from ApexClass 
-				where Status =: 'Active' ORDER BY Name LIMIT : numberOfItemsToShow];
+		classes = classService.loadClasses(numberOfItemsToShow);
 	}
 	
 	public void loadTriggers() {
-		triggers = [select id, Body, Name 
-				from ApexTrigger 
-				where Status =: 'Active' ORDER BY Name LIMIT : numberOfItemsToShow];
+		triggers = triggerService.loadTriggers(numberOfItemsToShow);
 	}
 	
 	public void loadClasses(String searchString) {
-		if(searchString != null){
-		searchString = '%' + searchString + '%';
-		classes = [select id, Body, Name from ApexClass  
-				where Status =: 'Active'
-				and Name like : searchString ORDER BY Name LIMIT : numberOfItemsToShow];
-		}
-		else {
-			loadClasses();
-		}	
+		classes = classService.loadClasses(searchString, numberOfItemsToShow);		
 	}
 	
 	public void loadTriggers(String searchString){ 
-		if(searchString != null) {
-			searchString = '%' + searchString + '%';
-			triggers = [select id, Body, Name from ApexTrigger  
-					where Status =: 'Active'
-					and Name like : searchString ORDER BY Name LIMIT : numberOfItemsToShow];
-		}
-		else {
-			loadTriggers();
-		}	
+		triggers = triggerService.loadTriggers(searchString, numberOfItemsToShow);		
 	}
 	
 	public void initializeApexClassIsSelectedMap() {
@@ -124,9 +97,9 @@ public with sharing class aci_ApexCodeInspector {
 	
 	public void loadClassInspectors() {
 		classInspectors = new List<InspectorWrapper>();
-		for(String clName : aci_Utils.findClassNamesWhichImplementInterface(CLASS_INSPECTOR_INTERFACE)){
+		for(String clName : inspectorService.findClassInspectorNames()){
 			try{
-				classInspectors.add(new InspectorWrapper((ClassInspector)Type.forName(clName).newInstance()));
+				classInspectors.add(new InspectorWrapper((aci_ClassInspector)Type.forName(clName).newInstance()));
 			}
 			catch(Exception e){
 				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,'Error occured due loading ' + clName + ' ' + e.getMessage()));
@@ -136,9 +109,9 @@ public with sharing class aci_ApexCodeInspector {
 	
 	public void loadTriggerInspectors() {
 		triggerInspectors = new List<InspectorWrapper>();
-		for(String clName : aci_Utils.findClassNamesWhichImplementInterface(TRIGGER_INSPECTOR_INTERFACE)){
+		for(String clName : inspectorService.findTriggerInspectorNames()){
 			try{
-				triggerInspectors.add(new InspectorWrapper((TriggerInspector)Type.forName(clName).newInstance()));
+				triggerInspectors.add(new InspectorWrapper((aci_TriggerInspector)Type.forName(clName).newInstance()));
 			}
 			catch(Exception e){
 				ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,'Error occured due loading ' + clName + ' ' + e.getMessage()));
@@ -192,12 +165,12 @@ public with sharing class aci_ApexCodeInspector {
 			return;
 		}
 		ApexClass cl = classes.get(nextIndex);
-		AnalysisResult [] results = new List<AnalysisResult>();
+		aci_AnalysisResult [] results = new List<aci_AnalysisResult>();
 		for(InspectorWrapper ci : classInspectors){
 			if(ci.isSelected) {
 				try {
 					system.debug('######## inspecting ' + cl.Name + ' with ' + ci.classInspector.getName());
-					AnalysisResult res = ci.classInspector.inspectClass(cl.Body);
+					aci_AnalysisResult res = ci.classInspector.inspectClass(cl.Body);
 					res.setInspectorName(ci.classInspector.getName());
 					res.setItemName(cl.Name);
 					results.add(res);
@@ -219,11 +192,11 @@ public with sharing class aci_ApexCodeInspector {
 			return;
 		}
 		ApexTrigger tr = triggers.get(nextIndex);
-		AnalysisResult [] results = new List<AnalysisResult>();
+		aci_AnalysisResult [] results = new List<aci_AnalysisResult>();
 		for(InspectorWrapper ci : triggerInspectors){
 			if(ci.isSelected) {
 				try {
-					AnalysisResult res = ci.triggerInspector.inspectTrigger(tr.Body);
+					aci_AnalysisResult res = ci.triggerInspector.inspectTrigger(tr.Body);
 					res.setInspectorName(ci.triggerInspector.getName());
 					res.setItemName(tr.Name);
 					results.add(res);
@@ -272,19 +245,15 @@ public with sharing class aci_ApexCodeInspector {
 	}
 	
 	public void saveResults() {
-		AnalysisExecution ex = new AnalysisExecution();
-		ex.setExecutionTime(system.now());
-		ex.setExecutedById(UserInfo.getUserId());
-		List<AnalysisResult> ress = new List<AnalysisResult>();
-		for(List<AnalysisResult> rl: itemNameResultMap.values()) {
-			for(AnalysisResult r: rl) {
+		List<aci_AnalysisResult> ress = new List<aci_AnalysisResult>();
+		for(List<aci_AnalysisResult> rl: itemNameResultMap.values()) {
+			for(aci_AnalysisResult r: rl) {
 				ress.add(r);
 			}
 		}
-		ex.setResults(ress);
 		isSaved = true;
 		try {
-			ex.save();
+			analysisService.saveResults(ress);
 			ApexPages.addMessage(new ApexPages.message(ApexPages.severity.CONFIRM, 'Saved'));
 		}
 		catch(Exception e) {

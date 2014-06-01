@@ -1,27 +1,25 @@
 /**
- * @author Pavel Demeshchik
- *
- * Class contains "to do" comments finder plugin 
+ * TODO comments finder plugin. 
  */
-public with sharing class aci_UncompleteCodeInspector implements aci_ApexCodeInspector.ClassInspector, aci_ApexCodeInspector.TriggerInspector {
+public with sharing class aci_UncompleteCodeInspector implements aci_ClassInspector, aci_TriggerInspector {
 	private static final String MESSAGE = 'TO DO comment detected';
 	private static final String COMMENT_REG_EXP = '(?s)(/\\*.*?\\*/)|(//[^\n]{0,}\n)';
 	private static final String TO_DO_REG_EXP = '(?i)to[ \t\n\f\r]{0,}do[^A-Za-z0-9]{1,}';
 	private static final Integer LINES_BEFORE_AFTER_COMMENT = 5;
 	
-	public AnalysisResult inspectClass(String body) {
+	public aci_AnalysisResult inspectClass(String body) {
 		return inspectItem(body);
 	}
 	
-	public AnalysisResult inspectTrigger(String body) {
+	public aci_AnalysisResult inspectTrigger(String body) {
 		return inspectItem(body);
 	}
 	
-	private AnalysisResult inspectItem(String body) {
+	private aci_AnalysisResult inspectItem(String body) {
 		String cBody = body;
-		body = aci_Utils.replaceAllStringLiteralsWithGridSymbol(body);
-		AnalysisResult r = new AnalysisResult();
-		r.setStatus(AnalysisResult.STATUS_OK);
+		body = aci_StringUtils.replaceAllStringLiteralsWithGridSymbol(body);
+		aci_AnalysisResult r = new aci_AnalysisResult();
+		r.setStatus(aci_AnalysisResult.STATUS_OK);
 		Pattern commPat = Pattern.compile(COMMENT_REG_EXP);
 		Matcher commMatch = commPat.matcher(body);
 		Integer startIndex = 0;
@@ -34,17 +32,17 @@ public with sharing class aci_UncompleteCodeInspector implements aci_ApexCodeIns
 			String comment = commMatch.group();
 			Matcher todoMat = todoPat.matcher(comment);
 			if(todoMat.find()) {
-				lineNumbers.add(aci_Utils.getLineNumberOfPosition(body, commMatch.start() + todoMat.end()));
-				r.setStatus(AnalysisResult.STATUS_WARNING);
+				lineNumbers.add(aci_StringUtils.getLineNumberOfPosition(body, commMatch.start() + todoMat.end()));
+				r.setStatus(aci_AnalysisResult.STATUS_WARNING);
 			}
 		}
-		if(r.getStatus() == AnalysisResult.STATUS_WARNING) {
-			AnalysisDetail det = new AnalysisDetail();
+		if(r.getStatus() == aci_AnalysisResult.STATUS_WARNING) {
+			aci_AnalysisDetail det = new aci_AnalysisDetail();
 			if(lineNumbers.size() < 2) {
 				det.setMessage(MESSAGE + '. Line ' + String.valueOf(lineNumbers.get(0)));	
 			}
 			else {
-				det.setMessage(MESSAGE + '. Lines ' + aci_Utils.getLineNumbersAsString(lineNumbers));	
+				det.setMessage(MESSAGE + '. Lines ' + aci_StringUtils.getLineNumbersAsString(lineNumbers));	
 			}
 			det.setCodeFragment(cBody);
 			r.addDetail(det);
